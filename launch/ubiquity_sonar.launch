@@ -1,0 +1,5 @@
+<launch>
+	<rosparam command="load" file="$(find ubiquity_sonar)/conf/sonar_skirt.yaml" />
+	<node pkg="ubiquity_sonar" type="ubiquity_sonar" name="ubiquity_sonar"/>
+</launch>
+
