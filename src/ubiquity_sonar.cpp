@@ -290,7 +290,7 @@ int main(int argc, char **argv)
   * buffer up before throwing some away.
   */
 
-  ros::Publisher ubuiquity_sonar = n.advertise<sensor_msgs::Range>("ubiquity_sonar", 100);
+  ros::Publisher ubiquity_sonar = n.advertise<sensor_msgs::Range>("ubiquity_sonar", 100);
 
   /**
    * A count of how many messages we have sent. This is used to create

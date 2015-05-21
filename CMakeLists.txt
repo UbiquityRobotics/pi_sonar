@@ -82,7 +82,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES hercules_sonar_skirt
-CATKIN_DEPENDS roscpp sensor_msgs serial
+   LIBRARIES ubiquity_sonar
+   CATKIN_DEPENDS roscpp sensor_msgs serial
 #  DEPENDS system_lib
 )
 
@@ -104,7 +105,7 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(hercules_sonar_skirt_node src/hercules_sonar_skirt_node.cpp)
-add_executable(ubiquity_sonor src/ubiquity_sonor.cpp 
+add_executable(ubiquity_sonar src/ubiquity_sonar.cpp 
    src/RangeMessage.cpp 
    src/RangeMessage.h)
 
@@ -113,11 +114,7 @@ add_executable(ubiquity_sonor src/ubiquity_sonor.cpp
 # add_dependencies(hercules_sonar_skirt_node hercules_sonar_skirt_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(ubiquity_sonar
-  ${catkin_LIBRARIES}
-  ${roscpp_LIBRARIES}
-  ${serial_LIBRARIES}  
-)
+target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES} ${serial_LIBRARIES}  )
 
 #############
 ## Install ##
@@ -134,16 +131,10 @@ target_link_libraries(ubiquity_sonar
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS ubiquity_sonar ubiquity_sonar_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-## Mark executables and/or libraries for installation
-install(TARGETS ubiquity_sonar 
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(TARGETS ubiquity_sonar ubiquity_sonar
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark cpp header files for installation
