@@ -44,10 +44,10 @@ install(TARGETS ubiquity_sonar ubiquity_sonar
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(FILES
-   launch/ubiquity_sonar.launch
-   DESTINATION ${CATKIN_PACKAGE_ETC_DESTINATION}
+install(DIRECTORY launch/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 
 #############
