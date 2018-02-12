@@ -43,6 +43,7 @@ public:
   // BCM GPIO pins
   int trigger_pin;
   int echo_pin;
+
   uint32_t start_tick;
   uint32_t elapsed_ticks;
 
@@ -62,7 +63,9 @@ public:
   }
 };
 
+
 std::vector<Sonar> sonars;
+
 
 /* Trigger the next sonar */
 void sonar_trigger()
@@ -83,8 +86,6 @@ void sonar_trigger()
 /* Handle pin change */
 void echo_callback(int pin, int level, uint32_t tick)
 {
-  int sonar = -1;
-
   for (auto& sonar : sonars) {
     if (pin == sonar.echo_pin) {
       if (level == PI_ON) {
@@ -103,7 +104,7 @@ void echo_callback(int pin, int level, uint32_t tick)
 
 int setup_gpio()
 {
-  if (gpioInitialise()<0) {
+  if (gpioInitialise() < 0) {
     return false;
   }
 
@@ -128,9 +129,6 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, "ubiquity_sonar");
   ros::NodeHandle nh("~");
 
-  std::vector<ros::Publisher> pubs;
-  std::vector<std::string> frames;
-
   double field_of_view;
   double min_range;
   double max_range;
@@ -141,6 +139,7 @@ int main(int argc, char *argv[])
 
   ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
 
+  // pin numbers are specific to the hardware
   sonars.push_back(Sonar(20, 21, 0, nh));
   sonars.push_back(Sonar(12, 16, 1, nh));
   sonars.push_back(Sonar(23, 24, 2, nh));
@@ -160,12 +159,14 @@ int main(int argc, char *argv[])
   msg.max_range = max_range;
   msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
 
+  ROS_INFO("Ubiquity Sonar node ready");
+
   while (ros::ok()) {
     for (auto& sonar : sonars) {
       uint32_t elapsed_ticks = sonar.elapsed_ticks;
       if (elapsed_ticks != 0) {
+        // clear so we don't publish again
         sonar.elapsed_ticks = 0;
-
         // seconds = ticks / 1000000
         // speed of sound = 343 m/s
         // for round trip, halve the distance
@@ -183,4 +184,3 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-
