@@ -105,14 +105,15 @@ int setup_gpio()
     return false;
   }
 
-  for (int i=0; i<nsonars; i++) {
-    gpioSetMode(sonars[i].trigger_pin, PI_OUTPUT);
-    gpioWrite (sonars[i].trigger_pin, PI_OFF);
+  sonar_t *p_sonar = sonars;
+  for (int i=0; i<nsonars; i++, p_sonar++) {
+    gpioSetMode(p_sonar->trigger_pin, PI_OUTPUT);
+    gpioWrite (p_sonar->trigger_pin, PI_OFF);
 
-    gpioSetMode(sonars[i].echo_pin, PI_INPUT);
+    gpioSetMode(p_sonar->echo_pin, PI_INPUT);
 
     /* monitor sonar echos */
-    gpioSetAlertFunc(sonars[i].echo_pin, echo_callback);
+    gpioSetAlertFunc(p_sonar->echo_pin, echo_callback);
   }
 
   /* update sonar 20 times a second, timer #0 */
@@ -175,8 +176,8 @@ int main(int argc, char *argv[])
         pubs[i].publish(msg);
       }
     } 
+    rate.sleep();
   }
-  rate.sleep();
     
   gpioTerminate();
 
