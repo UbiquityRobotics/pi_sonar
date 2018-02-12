@@ -38,23 +38,32 @@
 
 #include <boost/algorithm/string.hpp>
 
-typedef struct _sonar {
+class Sonar {
+public:
   // BCM GPIO pins
   int trigger_pin;
   int echo_pin;
   uint32_t start_tick;
   uint32_t elapsed_ticks;
-  } sonar_t;
 
-sonar_t sonars[] = {
-  { 20,	21, 0, 0 },
-  { 12,	16, 0, 0 },
-  { 23,	24, 0, 0 },
-  { 27,	22, 0, 0 },
-  { 19,	26, 0, 0 }
+  std::string frame;
+  ros::Publisher pub;
+
+  Sonar(int trigger_pin, int echo_pin, int id, ros::NodeHandle& nh)
+  {
+    this->trigger_pin = trigger_pin;
+    this->echo_pin = echo_pin;
+    this->pub = pub;
+
+    start_tick = 0;
+    elapsed_ticks = 0;
+
+    frame = str(boost::format{"sonar_%1%"} % id);
+    pub = nh.advertise<sensor_msgs::Range>(frame, 1);
+  }
 };
 
-static int nsonars = sizeof(sonars) / sizeof(sonars[0]);
+std::vector<Sonar> sonars;
 
 /* Trigger the next sonar */
 void sonar_trigger()
@@ -67,7 +76,7 @@ void sonar_trigger()
    gpioWrite(pin, PI_OFF);
 
    sonar++;
-   if (sonar >= nsonars) {
+   if (sonar >= sonars.size()) {
      sonar = 0;
    }
 }
@@ -76,28 +85,21 @@ void sonar_trigger()
 void echo_callback(int pin, int level, uint32_t tick)
 {
   int sonar = -1;
-  sonar_t *p_sonar = NULL;
 
-   for (int i=0; i<nsonars; i++) {
-     if (pin == sonars[i].echo_pin) {
-       sonar = i;
-       p_sonar = &sonars[i];
-       break;
+  for (auto& sonar : sonars) {
+    if (pin == sonar.echo_pin) {
+      if (level == PI_ON) {
+        sonar.start_tick = tick;
+      }
+      else if (level == PI_OFF) {
+        uint32_t elapsed = tick - sonar.start_tick;
+        sonar.elapsed_ticks = elapsed;
+        //printf("sonar %d elapsed %d\n", sonar, elapsed);
+      }
+      return;
      }
    }
-   if (sonar == -1) {
-     printf("Unexpected GPIO pin event, pin %d\n", pin);
-     return;
-   }
-
-   if (level == PI_ON) {
-     p_sonar->start_tick = tick;
-   }
-   else if (level == PI_OFF) {
-     uint32_t elapsed = tick - p_sonar->start_tick; 
-     p_sonar->elapsed_ticks = elapsed;
-     //printf("sonar %d elapsed %d\n", sonar, elapsed);
-   }
+   printf("Unexpected GPIO pin event, pin %d\n", pin);
 }
 
 int setup_gpio()
@@ -106,15 +108,14 @@ int setup_gpio()
     return false;
   }
 
-  sonar_t *p_sonar = sonars;
-  for (int i=0; i<nsonars; i++, p_sonar++) {
-    gpioSetMode(p_sonar->trigger_pin, PI_OUTPUT);
-    gpioWrite (p_sonar->trigger_pin, PI_OFF);
+  for (const auto& sonar : sonars) {
+    gpioSetMode(sonar.trigger_pin, PI_OUTPUT);
+    gpioWrite (sonar.trigger_pin, PI_OFF);
 
-    gpioSetMode(p_sonar->echo_pin, PI_INPUT);
+    gpioSetMode(sonar.echo_pin, PI_INPUT);
 
     /* monitor sonar echos */
-    gpioSetAlertFunc(p_sonar->echo_pin, echo_callback);
+    gpioSetAlertFunc(sonar.echo_pin, echo_callback);
   }
 
   /* update sonar 20 times a second, timer #0 */
@@ -139,14 +140,13 @@ int main(int argc, char *argv[])
   nh.param<double>("min_range", min_range, .05);
   nh.param<double>("max_range", max_range, 10);
 
-  for (int i=0; i<nsonars; i++) {
-    std::string frame = str(boost::format{"sonar_%1%"} % i);
-    frames.push_back(frame);
-    pubs.push_back(nh.advertise<sensor_msgs::Range>(frame, 1));
-  }
+  ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
 
-  ros::Publisher pub =
-        nh.advertise<sensor_msgs::Range>("/sonars", 5);
+  sonars.push_back(Sonar(20, 21, 0, nh));
+  sonars.push_back(Sonar(12, 16, 1, nh));
+  sonars.push_back(Sonar(23, 24, 2, nh));
+  sonars.push_back(Sonar(27, 22, 3, nh));
+  sonars.push_back(Sonar(19, 26, 4, nh));
 
   if (!setup_gpio()) {
     ROS_ERROR("Cannot initalize gpio");
@@ -155,31 +155,31 @@ int main(int argc, char *argv[])
 
   ros::Rate rate(50);
 
-  while (ros::ok()) {
-    sonar_t *p_sonar = sonars;
-    for (int i=0; i<nsonars; i++, p_sonar++) {
-      uint32_t elapsed_ticks = p_sonar->elapsed_ticks;
-      if (elapsed_ticks != 0) {
-        p_sonar->elapsed_ticks = 0;
+  sensor_msgs::Range msg;
+  msg.field_of_view = field_of_view;
+  msg.min_range = min_range;
+  msg.max_range = max_range;
+  msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
 
-        sensor_msgs::Range msg;
-        msg.field_of_view = field_of_view;
-        msg.min_range = min_range;
-        msg.max_range = max_range;
-        msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
-        // seconds = ticks / 1000000 
-        // speed of sound = 343 m/s 
-        // round trip = double the distance
+  while (ros::ok()) {
+    for (auto& sonar : sonars) {
+      uint32_t elapsed_ticks = sonar.elapsed_ticks;
+      if (elapsed_ticks != 0) {
+        sonar.elapsed_ticks = 0;
+
+        // seconds = ticks / 1000000
+        // speed of sound = 343 m/s
+        // for round trip, halve the distance
         msg.range = (float)elapsed_ticks * 0.0001715;
         msg.header.stamp = ros::Time::now();
-        msg.header.frame_id = frames[i];
+        msg.header.frame_id = sonar.frame;
         pub.publish(msg);
-        pubs[i].publish(msg);
+        sonar.pub.publish(msg);
       }
-    } 
+    }
     rate.sleep();
   }
-    
+
   gpioTerminate();
 
   return 0;
