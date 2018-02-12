@@ -1,368 +1,185 @@
+/*
+ * Copyright (c) 2018, Ubiquity Robotics
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation are
+ * those of the authors and should not be interpreted as representing official
+ * policies, either expressed or implied, of the FreeBSD Project.
+ *
+ */
+
+#include <stdio.h>
+#include <unistd.h>
+#include <pigpio.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/Range.h>
 
-#include <sstream>
-#include <string>
-#include <stdlib.h>
-#include <exception>
-#include <serial/serial.h>
+#include <boost/algorithm/string.hpp>
 
-#include "RangeMessage.h"
+typedef struct _sonar {
+  // BCM GPIO pins
+  int trigger_pin;
+  int echo_pin;
+  uint32_t start_tick;
+  uint32_t elapsed_ticks;
+  } sonar_t;
 
-/**
- * This code is based on the WritngPublisherSubscriber(c++) tutorial for Hydro.
- */
-int main(int argc, char **argv)
+sonar_t sonars[] = {
+  { 20,	21, 0, 0 },
+  { 12,	16, 0, 0 },
+  { 23,	24, 0, 0 },
+  { 27,	22, 0, 0 },
+  { 19,	26, 0, 0 }
+};
+
+static int nsonars = sizeof(sonars) / sizeof(sonars[0]);
+
+/* Trigger the next sonar */
+void sonar_trigger()
 {
-  /**
-   * The ros::init() function needs to see argc and argv so that it can perform
-   * any ROS arguments and name remapping that were provided at the command line. For programmatic
-   * remappings you can use a different version of init() which takes remappings
-   * directly, but for most command-line programs, passing argc and argv is the easiest
-   * way to do it.  The third argument to init() is the name of the node.
-   *
-   * You must call one of the versions of ros::init() before using any other
-   * part of the ROS system.
-   */
-  ros::init(argc, argv, "ubiquity_sonar");
+   static int sonar = 0;
 
-  /**
-   * NodeHandle is the main access point to communications with the ROS system.
-   * The first NodeHandle constructed will fully initialize this node, and the last
-   * NodeHandle destructed will close down the node.
-   */
-  ros::NodeHandle n;
-  serial::Serial sonar_addr;
+   int pin = sonars[sonar].trigger_pin;
+   gpioWrite(pin, PI_ON);
+   gpioDelay(10); /* 10us trigger pulse */
+   gpioWrite(pin, PI_OFF);
 
-
-  /*
-   * Serial port parameters
-   */
-  std::string sPort;
-  int iBaud = 0;
-  serial::Timeout to;
-  int iBytesize = 0;
-  std::string sParity;
-  int iStopbits = 0;
-  std::string sFlowControl;
-
-  /*
-   * Sonar Message Parameters
-   *
-   * Radiation type is hardcoded to ULTRASOUND.
-   */
-	double dFieldOfView;		//set in radians
-	double dMinimumRange;	//set in meters
-	double dMaximumRange;	//set in meters
-
-  /*
-   * Node Parameters
-   */
-  int iLoopRate;  // the number of times per second I want to loop
-
-
-
-  if (!n.getParam("ubiquity/sonar/serial_comm_port", sPort))
-  {
-	  sPort.assign("/dev/ttyS0");
-	  sonar_addr.setPort(sPort);
-	  n.setParam("ubiquity/sonar/serial_comm_port", sPort);
-  } else {
-	  sonar_addr.setPort(sPort);
-  }
-
-  /* Obtain the baud rate.
-   *
-   * Invalid parameters are ignored and reset to the default of 115200
-   */
-  if (!n.getParam("/ubiquity/sonar/serial_baud_rate", iBaud))
-  {
-	  sonar_addr.setBaudrate(115200);
-	  n.setParam("/ubiquity/sonar/serial_baud_rate", 115200);
-  } else {
-	  switch (iBaud)
-	  {
-	  case 110 :
-	  case 300 :
-	  case 600 :
-	  case 1200 :
-	  case 2400 :
-	  case 4800 :
-	  case 9600 :
-	  case 14400 :
-	  case 19200 :
-	  case 28800 :
-	  case 38400 :
-	  case 56000 :
-	  case 57600 :
-	  case 115200 :
-	  case 128000 :
-	  case 153600 :
-	  case 230400 :
-	  case 256000 :
-	  case 460800 :
-	  case 921600 :
-		  sonar_addr.setBaudrate(iBaud);
-		  break;
-	  default :
-		  ROS_ERROR("Unsupported \"/ubiquity/sonar/serial_baud_rate\" parameter value \"%d\"", iBaud);
-		  ROS_INFO("Setting \"/ubiquity/sonar/serial_baud_rate\" parameter to \"115200\"");
-		  n.setParam("/ubiquity/sonar/baud_rate", 115200);
-		  sonar_addr.setBaudrate(115200);
-		  break;
-	  }
-  }
-
-  //set the serial port timeout
-  to.simpleTimeout(1000);
-  sonar_addr.setTimeout(to);
-
-  /*
-   * Obtain the serial byte size (5,6,7, or 8 bits).
-   * Invalid settings are ignored and the default 8 bits is used.
-   */
-  if (!n.getParam("/ubiquity/sonar/serial_byte_size", iBytesize))
-  {
-	  sonar_addr.setBytesize(serial::eightbits);
-	  n.setParam("/ubiquity/sonar/serial_byte_size", serial::eightbits);
-  } else {
-	  switch (iBytesize)
-	  {
-	  	  case serial::fivebits :
-	  		sonar_addr.setBytesize(serial::fivebits);
-	  		break;
-	  	  case serial::sixbits :
-	  		sonar_addr.setBytesize(serial::sixbits);
-	  		break;
-	  	  case serial::sevenbits :
-	  		sonar_addr.setBytesize(serial::sevenbits);
-	  		break;
-	  	  case serial::eightbits :
-	  		sonar_addr.setBytesize(serial::eightbits);
-	  		break;
-	  	  default :
-			ROS_ERROR("Unsupported \"/ubiquity/sonar/serial_byte_size\" parameter value \"%d\"", iBytesize);
-			ROS_INFO("Setting \"/ubiquity/sonar/serial_byte_size\" parameter to \"8\"");
-			n.setParam("/ubiquity/sonar/serial_byte_size", serial::eightbits);
-	  		sonar_addr.setBytesize(serial::eightbits);
-	  		break;
-	  }
-  }
-
-  /*!
-   * Obtain the parity for the serial port.
-   * Invalid values are ignored and the default ("none") is used.
-   */
-  if (!n.getParam("/ubiquity/sonar/serial_parity", sParity))
-  {
-	  sonar_addr.setParity(serial::parity_none);
-	  n.setParam("/ubiquity/sonar/serial_parity", "none");
-	  sParity.assign("none");
-  } else {  //case insensitive in the parameter file
-	  std::transform(sParity.begin(), sParity.end(), 
-                         sParity.begin(), ::tolower);
-  }
-
-  if (sParity.compare("none")) {
-  	  sonar_addr.setParity(serial::parity_none);
-  } else if (sParity.compare("odd")) {
-  	  sonar_addr.setParity(serial::parity_odd);
-  } else if (sParity.compare("even")) {
-	  sonar_addr.setParity(serial::parity_even);
-  } else { // default
-	  ROS_ERROR("Unsupported \"/ubiquity/sonar/serial_parity\" parameter value \"%s\"", sParity.c_str());
-	  ROS_INFO("Setting \"/ubiquity/sonar/serial_parity\" parameter to \"none\"");
-	  n.setParam("parity", "none");
-	  sonar_addr.setParity(serial::parity_none);
-  }
-
-  /*!
-   * Obtain the number of stopbits for the serial port (1, 1.5, 2).
-   *
-   * Invalid parameters and the default value of 1 is used.
-   * NOTE:  The current version of the serial package does not handle 1.5
-   * TODO:  Add support when I see how they modified the next release of serial
-   */
-  if (!n.getParam("/ubiquity/sonar/serial_stop_bits", iStopbits))
-  {  // make the default as one stop bit
-	  sonar_addr.setStopbits(serial::stopbits_one);
-	  n.setParam("/ubiquity/sonar/serial_stop_bits", 1);
-  } else {
-	  switch (iStopbits) {
-	  case serial::stopbits_one :
-		  sonar_addr.setStopbits(serial::stopbits_one);
-          break;
-	  case serial::stopbits_two :
-		  sonar_addr.setStopbits(serial::stopbits_two);
-          break;
-	  default:
-		  ROS_ERROR("Unsupported \"/ubiquity/sonar/serial_stop_bits\" parameter value \"%d\"", iStopbits);
-		  ROS_INFO("Setting \"/ubiquity/sonar/serial_stop_bits\" parameter to \"1\"");
-		  n.setParam("/ubiquity/sonar/serial_stop_bits", 1);
-          sonar_addr.setStopbits(serial::stopbits_one);
-		  break;
-	  }
-  }
-
-  /*!
-   * Obtain the flow control for the serial port.
-   * Allowed values are:
-   *    "none" (default),
-   *    "software",
-   *    "hardware"
-   * Invalid values are ignored and the default is used
-   */
-  if (!n.getParam("/ubiquity/sonar/serial_flow_control", sFlowControl))
-  {  // did not find key/value pair - setting yaml parameter to "none"
-	  n.setParam("/ubiquity/sonar/serial_flow_control", "none");
-	  sFlowControl.assign("none");
-  } else { // case insensitive string in the parameter file
-	  std::transform(sFlowControl.begin(), sFlowControl.end(), 
-                         sFlowControl.begin(), ::tolower);
-  }
-
-  if (sFlowControl.compare("none")) {
-	  sonar_addr.setFlowcontrol(serial::flowcontrol_none);
-  } else if (sFlowControl.compare("hardware")) {
-	  sonar_addr.setFlowcontrol(serial::flowcontrol_hardware);
-  } else if (sFlowControl.compare("software")) {
-	  sonar_addr.setFlowcontrol(serial::flowcontrol_software);
-  } else { // default
-	  ROS_ERROR("Unsupported \"/ubiquity/sonar/serial_flow_control\" parameter value \"%s\"", sFlowControl.c_str());
-	  ROS_INFO("Setting \"/ubiquity/sonar/serial_flow_control\" parameter to \"1\"");
-	  sonar_addr.setFlowcontrol(serial::flowcontrol_none);
-  }
-
-  //allocate the range message
-  ur::RangeMessage msg;
-  /*
-   * Set the field of view, minimum range, and maximum range.
-   */
-
-
-  if (!n.getParam("/ubiquity/sonar/sonar_field_of_view", dFieldOfView))
-  {  // set default to .175 radians (10 degrees)
-	  n.setParam("/ubiquity/sonar/sonar_field_of_view", 0.175);
-	  msg.setFieldOfView(0.175);
-  } else {
-	  msg.setFieldOfView((float) dFieldOfView);
-  }
-  if (!n.getParam("/ubiquity/sonar/sonar_minimum_range", dMinimumRange))
-  {  // Set default to 1 cm (.01 meters)
-	  n.setParam("/ubiquity/sonar/sonar_minimum_range", 0.01);
-	  msg.setMinimumRange(0.01);
-  } else {
-	  msg.setMinimumRange((float) dMinimumRange);
-  }
-  if (!n.getParam("/ubiquity/sonar/sonar_maximum_range", dMaximumRange))
-  {  // Set default to 4 meters
-	  n.setParam("/ubiquity/sonar/sonar_maximum_range", 4);
-	  msg.setMaximumRange(4);
-  } else {
-	  msg.setMaximumRange((float) dMaximumRange);
-  }
-
-  /*
-   * Pick up the sleep value for the message loop.  Any integer is valid
-   */
-  if (!n.getParam("/ubiquity/sonar/loop_rate", iLoopRate))
-  {
-	  iLoopRate = 150;
-	  n.setParam("/ubiquity/sonar/loop_rate", 150);
-  }
-  ros::Rate loop_rate(iLoopRate);
-
-  /**
-  * The advertise() function is how you tell ROS that you want to
-  * publish on a given topic name. This invokes a call to the ROS
-  * master node, which keeps a registry of who is publishing and who
-  * is subscribing. After this advertise() call is made, the master
-  * node will notify anyone who is trying to subscribe to this topic name,
-  * and they will in turn negotiate a peer-to-peer connection with this
-  * node.  advertise() returns a Publisher object which allows you to
-  * publish messages on that topic through a call to publish().  Once
-  * all copies of the returned Publisher object are destroyed, the topic
-  * will be automatically unadvertised.
-  *
-  * The second parameter to advertise() is the size of the message queue
-  * used for publishing messages.  If messages are published more quickly
-  * than we can send them, the number here specifies how many messages to
-  * buffer up before throwing some away.
-  */
-
-  ros::Publisher ubiquity_sonar = n.advertise<sensor_msgs::Range>("ubiquity_sonar", 100);
-
-  /**
-   * A count of how many messages we have sent. This is used to create
-   * a unique string for each message.
-   * We need to maintain a count for each sonar on the sonar_addr.
-   */
-  int count[10] = {0,0,0,0,0,0,0,0,0,0};
-  double reading;	//the LHS value (range reading from sonar[])
-
-  /*
-   * Allocate the buffer to capture a line of text from the arduino
-   * Each line is in the format [sonar]=[distance reading in centimeters]CRLF
-   *
-   *    '1=324'
-   */
-  std::string sBuffer((size_t) 10, '\0');
-
-  /*
-   * Open the serial port
-   */
-  try
-  {
-	  sonar_addr.open();
-  } catch (serial::PortNotOpenedException &e) {
-	  ROS_ERROR("Serial port not opened: \"%s\"", e.what());
-  } catch (serial::IOException &e) {
-	  ROS_ERROR("IOException: \"%s\"", e.what());
-  } catch (std::invalid_argument) {
-	  ROS_ERROR("Attempted to open the serial port with an invalid argument");
-  }
-
-  if(!sonar_addr.isOpen())
-  {
-	  ROS_ERROR("unable to open serial port: \"%s\"", sPort.c_str());
-	  return (-1);
-  }
-
-
-  while (ros::ok())
-  {
-    /**
-     * This is a message object. You stuff it with data, and then publish it.
-     */
-
-
-	sBuffer.assign(sonar_addr.readline(10, "\n"));
-	unsigned pos = sBuffer.find("=");
-	char *ptr;
-
-	int ident;
-	float r;
-
-	ROS_INFO("Raw data: %s", sBuffer.c_str());
-	//parse out the sensor identifier
-	ident = (int) std::strtol(sBuffer.substr(0,(pos)).c_str(), &ptr, 10);
-
-	/**
-	 * Chris feeds me range values in centimeters.
-	 * Need to convert to meters.
-	 */
-	r = (float) std::strtod(sBuffer.substr(pos+1).c_str(), &ptr)/100;
-
-	msg.setSonarIdentity(ident);
-	msg.setRange(r);
-
-	if((ident >= 1) && (ident <= 10))
-	  msg.publish( ubiquity_sonar, count[ ident - 1 ]++ );
-
-    ros::spinOnce();
-
-    loop_rate.sleep();
-  }
-
-  return (0);
+   sonar++;
+   if (sonar >= nsonars) {
+     sonar = 0;
+   }
 }
+
+/* Handle pin change */
+void echo_callback(int pin, int level, uint32_t tick)
+{
+  int sonar = -1;
+  sonar_t *p_sonar = NULL;
+
+   for (int i=0; i<nsonars; i++) {
+     if (pin == sonars[i].echo_pin) {
+       sonar = i;
+       p_sonar = &sonars[i];
+     }
+   }
+   if (sonar == -1) {
+     printf("Unexpected GPIO pin event, pin %d\n", pin);
+     return;
+   }
+
+   if (level == PI_ON) {
+     p_sonar->start_tick = tick;
+   }
+   else if (level == PI_OFF) {
+     uint32_t elapsed = tick - p_sonar->start_tick; 
+     p_sonar->elapsed_ticks = elapsed;
+     //printf("sonar %d elapsed %d\n", sonar, elapsed);
+   }
+}
+
+int setup_gpio()
+{
+  if (gpioInitialise()<0) {
+    return false;
+  }
+
+  for (int i=0; i<nsonars; i++) {
+    gpioSetMode(sonars[i].trigger_pin, PI_OUTPUT);
+    gpioWrite (sonars[i].trigger_pin, PI_OFF);
+
+    gpioSetMode(sonars[i].echo_pin, PI_INPUT);
+
+    /* monitor sonar echos */
+    gpioSetAlertFunc(sonars[i].echo_pin, echo_callback);
+  }
+
+  /* update sonar 20 times a second, timer #0 */
+  gpioSetTimerFunc(0, 50, sonar_trigger); /* every 50ms */
+
+  return true;
+}
+
+int main(int argc, char *argv[])
+{
+  ros::init(argc, argv, "ubiquity_sonar");
+  ros::NodeHandle nh("~");
+
+  std::vector<ros::Publisher> pubs;
+  std::vector<std::string> frames;
+
+  double field_of_view;
+  double min_range;
+  double max_range;
+
+  nh.param<double>("field_of_view", field_of_view, .43632347);
+  nh.param<double>("min_range", min_range, .05);
+  nh.param<double>("max_range", max_range, 10);
+
+  for (int i=0; i<nsonars; i++) {
+    std::string frame = str(boost::format{"sonar_%1%"} % i);
+    frames.push_back(frame);
+    pubs.push_back(nh.advertise<sensor_msgs::Range>(frame, 1));
+  }
+
+  ros::Publisher pub =
+        nh.advertise<sensor_msgs::Range>("/sonars", 5);
+
+  if (!setup_gpio()) {
+    ROS_ERROR("Cannot initalize gpio");
+    return 1;
+  }
+
+  ros::Rate rate(50);
+
+  while (ros::ok()) {
+    sonar_t *p_sonar = sonars;
+    for (int i=0; i<nsonars; i++, p_sonar++) {
+      uint32_t elapsed_ticks = p_sonar->elapsed_ticks;
+      if (elapsed_ticks != 0) {
+        p_sonar->elapsed_ticks = 0;
+
+        sensor_msgs::Range msg;
+        msg.field_of_view = field_of_view;
+        msg.min_range = min_range;
+        msg.max_range = max_range;
+        msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
+        // seconds = ticks / 1000000 
+        // speed of sound = 343 m/s 
+        // round trip = double the distance
+        msg.range = (float)elapsed_ticks * 0.0001715;
+        msg.header.stamp = ros::Time::now();
+        msg.header.frame_id = frames[i];
+        pub.publish(msg);
+        pubs[i].publish(msg);
+      }
+    } 
+  }
+  rate.sleep();
+    
+  gpioTerminate();
+
+  return 0;
+}
+
