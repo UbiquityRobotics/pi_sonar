@@ -53,7 +53,6 @@ public:
   {
     this->trigger_pin = trigger_pin;
     this->echo_pin = echo_pin;
-    this->pub = pub;
 
     start_tick = 0;
     elapsed_ticks = 0;
