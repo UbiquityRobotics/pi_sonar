@@ -82,6 +82,7 @@ void echo_callback(int pin, int level, uint32_t tick)
      if (pin == sonars[i].echo_pin) {
        sonar = i;
        p_sonar = &sonars[i];
+       break;
      }
    }
    if (sonar == -1) {
