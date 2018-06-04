@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.0)
 project(ubiquity_sonar)
 
 ## Find catkin macros and libraries
@@ -8,9 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
 )
-
-## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system)
 
 ###################################
 ## catkin specific configuration ##
@@ -24,24 +21,27 @@ catkin_package(
 ## Build ##
 ###########
 
-add_definitions(-std=c++11)
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
-add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
-
+include_directories(pigpio ${catkin_INCLUDE_DIRS})
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
-  target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES}
-                        pigpio pthread)
+  add_library(pigpio STATIC
+    pigpio/pigpio.c
+    pigpio/command.c 
+  )
+  target_compile_options(pigpio PRIVATE -std=c11 -fpic -O3)
+  target_link_libraries(pigpio pthread)
+
+  add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
+  target_compile_options(ubiquity_sonar PRIVATE -std=c++11)
+  target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
+                        ${roscpp_LIBRARIES} pigpio pthread)
 endif()
 
 #############
 ## Install ##
 #############
 
-install(TARGETS ubiquity_sonar ubiquity_sonar
+install(TARGETS ubiquity_sonar
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

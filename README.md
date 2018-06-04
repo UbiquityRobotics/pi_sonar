@@ -26,4 +26,5 @@ To run:
 roslaunch ubiquity_sonar ubiquity_sonar.launch
 ```
 
-
+Update pigpio:
+git subtree pull --squash --prefix=pigpio https://github.com/joan2937/pigpio.git {ref to pull}
