@@ -28,11 +28,11 @@ add_library(pigpio STATIC
   pigpio/pigpio.c
   pigpio/command.c 
 )
+target_compile_options(pigpio PRIVATE -std=c11 -fpic -03)
 target_link_libraries(pigpio pthread)
-target_compile_definitions(pigpio -std=c11 -Wall -fpic -03)
 
-add_definitions(-std=c++11)
 add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
+target_compile_options(ubiquity_sonar PRIVATE -std=c++11)
 target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
                       ${roscpp_LIBRARIES} pigpio pthread)
 
