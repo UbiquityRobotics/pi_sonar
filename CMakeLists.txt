@@ -23,18 +23,19 @@ catkin_package(
 
 
 include_directories(pigpio ${catkin_INCLUDE_DIRS})
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
+  add_library(pigpio STATIC
+    pigpio/pigpio.c
+    pigpio/command.c 
+  )
+  target_compile_options(pigpio PRIVATE -std=c11 -fpic -03)
+  target_link_libraries(pigpio pthread)
 
-add_library(pigpio STATIC
-  pigpio/pigpio.c
-  pigpio/command.c 
-)
-target_compile_options(pigpio PRIVATE -std=c11 -fpic -03)
-target_link_libraries(pigpio pthread)
-
-add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
-target_compile_options(ubiquity_sonar PRIVATE -std=c++11)
-target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
-                      ${roscpp_LIBRARIES} pigpio pthread)
+  add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
+  target_compile_options(ubiquity_sonar PRIVATE -std=c++11)
+  target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
+                        ${roscpp_LIBRARIES} pigpio pthread)
+endif()
 
 #############
 ## Install ##
