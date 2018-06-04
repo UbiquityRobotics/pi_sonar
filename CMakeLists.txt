@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.0)
 project(ubiquity_sonar)
 
 ## Find catkin macros and libraries
@@ -21,7 +21,6 @@ catkin_package(
 ## Build ##
 ###########
 
-add_definitions(-std=c++11)
 
 include_directories(pigpio ${catkin_INCLUDE_DIRS})
 
@@ -29,11 +28,13 @@ add_library(pigpio STATIC
   pigpio/pigpio.c
   pigpio/command.c 
 )
+target_link_libraries(pigpio pthread)
+target_compile_definitions(pigpio -std=c11 -Wall -fpic -03)
 
+add_definitions(-std=c++11)
 add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
-
-target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES}
-                      pigpio pthread)
+target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
+                      ${roscpp_LIBRARIES} pigpio pthread)
 
 #############
 ## Install ##
