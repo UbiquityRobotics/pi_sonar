@@ -39,7 +39,7 @@ target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES}
 ## Install ##
 #############
 
-install(TARGETS ubiquity_sonar ubiquity_sonar
+install(TARGETS ubiquity_sonar
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
