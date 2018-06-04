@@ -9,9 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system)
-
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -26,8 +23,11 @@ catkin_package(
 
 add_definitions(-std=c++11)
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
+include_directories(pigpio ${catkin_INCLUDE_DIRS})
+
+add_library(pigpio STATIC
+  pigpio/pigpio.c
+  pigpio/command.c 
 )
 
 add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
