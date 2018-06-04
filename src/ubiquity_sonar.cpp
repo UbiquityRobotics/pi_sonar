@@ -29,6 +29,8 @@
  *
  */
 
+#ifdef __arm__
+
 #include <stdio.h>
 #include <unistd.h>
 #include <pigpio.h>
@@ -37,6 +39,7 @@
 #include <sensor_msgs/Range.h>
 
 #include <boost/algorithm/string.hpp>
+
 
 class Sonar {
 public:
@@ -64,7 +67,7 @@ public:
 };
 
 
-std::vector<Sonar> sonars;
+static std::vector<Sonar> sonars;
 
 
 /* Trigger the next sonar */
@@ -184,3 +187,14 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+
+#else
+
+#include <stdio.h>
+
+int main(int argc, char **argv) {
+  fprintf(stderr, "ubiquity_sonar only works on the Raspberry Pi\n");
+  return 1;
+}
+
+#endif // __arm__

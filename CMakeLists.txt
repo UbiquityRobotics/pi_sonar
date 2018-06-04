@@ -32,8 +32,10 @@ include_directories(
 
 add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
 
-target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES}
-                      pigpio pthread)
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
+  target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES} ${roscpp_LIBRARIES}
+                        pigpio pthread)
+endif()
 
 #############
 ## Install ##
