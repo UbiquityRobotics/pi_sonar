@@ -129,7 +129,7 @@ int setup_gpio()
 
 int main(int argc, char *argv[])
 {
-  ros::init(argc, argv, "ubiquity_sonar");
+  ros::init(argc, argv, "pi_sonar");
   ros::NodeHandle nh("~");
 
   double field_of_view;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
   msg.max_range = max_range;
   msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
 
-  ROS_INFO("Ubiquity Sonar node ready");
+  ROS_INFO("Pi Sonar node ready");
 
   while (ros::ok()) {
     for (auto& sonar : sonars) {
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-  fprintf(stderr, "ubiquity_sonar only works on the Raspberry Pi\n");
+  fprintf(stderr, "pi_sonar only works on the Raspberry Pi\n");
   return 1;
 }
 

@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
 <package>
-  <name>ubiquity_sonar</name>
+  <name>pi_sonar</name>
   <version>0.2.0</version>
-  <description>ROS package for the Ubiquity Sonar array</description>
+  <description>ROS package for running sonars off the Raspberry Pi</description>
 
-  <maintainer email="jimv@mrjim.com">Jim Vaughan</maintainer>
+  <maintainer email="ra@ubiquityrobotics.com">Rohan Agrawal</maintainer>
+  <author email="jimv@mrjim.com">Jim Vaughan</author>
 
   <license>BSD</license>
 
-  <url type="website">http://github.com/UbiquityRobotics/ubiquity_sonar</url>
+  <url type="website">http://github.com/UbiquityRobotics/pi_sonar</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(ubiquity_sonar)
+project(pi_sonar)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -31,9 +31,9 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
   target_compile_options(pigpio PRIVATE -std=c11 -fpic -O3)
   target_link_libraries(pigpio pthread)
 
-  add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
-  target_compile_options(ubiquity_sonar PRIVATE -std=c++11)
-  target_link_libraries(ubiquity_sonar ${catkin_LIBRARIES}
+  add_executable(pi_sonar src/pi_sonar.cpp)
+  target_compile_options(pi_sonar PRIVATE -std=c++11)
+  target_link_libraries(pi_sonar ${catkin_LIBRARIES}
                         ${roscpp_LIBRARIES} pigpio pthread)
 endif()
 
@@ -41,7 +41,7 @@ endif()
 ## Install ##
 #############
 
-install(TARGETS ubiquity_sonar
+install(TARGETS pi_sonar
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

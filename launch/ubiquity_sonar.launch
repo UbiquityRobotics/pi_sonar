@@ -1,4 +1,4 @@
 <launch>
-  <node pkg="ubiquity_sonar" type="ubiquity_sonar" name="ubiquity_sonar"/>
+  <node pkg="pi_sonar" type="pi_sonar" name="pi_sonar"/>
 </launch>
 
