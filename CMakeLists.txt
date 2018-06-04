@@ -28,7 +28,7 @@ add_library(pigpio STATIC
   pigpio/pigpio.c
   pigpio/command.c 
 )
-target_compile_options(pigpio PRIVATE -std=c11 -fpic -03)
+target_compile_options(pigpio PRIVATE -std=c11 -fpic -O3)
 target_link_libraries(pigpio pthread)
 
 add_executable(ubiquity_sonar src/ubiquity_sonar.cpp)
