@@ -23,6 +23,7 @@ catkin_package(
 
 
 include_directories(pigpio ${catkin_INCLUDE_DIRS})
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
   add_library(pigpio STATIC
     pigpio/pigpio.c
