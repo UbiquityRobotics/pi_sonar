@@ -2,8 +2,8 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2018-06-04)
+------------------
 * explictly add rpath
 * Contributors: Rohan Agrawal
 
