@@ -5,6 +5,7 @@ project(pi_sonar)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  diagnostic_updater
   roscpp
   sensor_msgs
 )
@@ -14,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-   CATKIN_DEPENDS roscpp sensor_msgs
+   CATKIN_DEPENDS diagnostic_updater roscpp sensor_msgs
 )
 
 ###########

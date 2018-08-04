@@ -12,10 +12,12 @@
   <url type="website">http://github.com/UbiquityRobotics/pi_sonar</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>diagnostic_updater</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>diagnostic_updater</run_depend>
 
   <export>
   </export>
