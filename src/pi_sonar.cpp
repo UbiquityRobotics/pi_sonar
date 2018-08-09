@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pigpio.h>
-#include <time.h>
 
 #include <ros/ros.h>
 #include <sensor_msgs/Range.h>
@@ -43,6 +42,9 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
+
+double min_freq = 0.5;
+double max_freq = 60;
 
 class Sonar {
 public:
@@ -59,6 +61,9 @@ public:
 
   bool range_error = false;
 
+  std::unique_ptr<diagnostic_updater::Updater> updater;
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> pub_freq;
+ 
   Sonar(int trigger_pin, int echo_pin, int id, ros::NodeHandle& nh)
   {
     this->trigger_pin = trigger_pin;
@@ -70,6 +75,18 @@ public:
 
     frame = str(boost::format{"sonar_%1%"} % id);
     pub = nh.advertise<sensor_msgs::Range>(frame, 1);
+    
+    updater.reset(new diagnostic_updater::Updater());
+    updater->setHardwareIDf("sonar_%d",id);
+    pub_freq.reset(new diagnostic_updater::HeaderlessTopicDiagnostic(
+      str(boost::format{"/pi_sonar/sonar_%1%"} % id), 
+      *updater,
+      diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10))
+    );
+    updater->add(str(boost::format{"Sonar %1% Range Checker"} % id),
+      this,
+      &Sonar::range_check
+    );
   }
 
   void range_check(diagnostic_updater::DiagnosticStatusWrapper &stat)
@@ -85,9 +102,6 @@ public:
 
 
 static std::vector<Sonar> sonars;
-clock_t last_times[5];
-double min_freq = 0.5; 
-double max_freq = 60;
 
 /* Trigger the next sonar */
 void sonar_trigger()
@@ -137,7 +151,7 @@ int setup_gpio()
     gpioSetMode(sonar.echo_pin, PI_INPUT);
 
     /* monitor sonar echos */
-    gpioSetAlertFunc(sonar.echo_pin, echo_callback);
+    gpioSetAlertFunc(sonar.echo_pin,echo_callback);
   }
 
   /* update sonar 20 times a second, timer #0 */
@@ -183,43 +197,24 @@ int main(int argc, char *argv[])
 
   ROS_INFO("Pi Sonar node ready");
 
-  diagnostic_updater::Updater updaters[5];
-  diagnostic_updater::HeaderlessTopicDiagnostic *pub_freq[5];
-  for (int id = 0; id < 5; id++) {
-    updaters[id].setHardwareIDf("sonar_%d",id);
-    pub_freq[id] = new diagnostic_updater::HeaderlessTopicDiagnostic(
-        str(boost::format{"/pi_sonar/sonar_%1%"} % id), 
-        updaters[id],
-        diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
-    updaters[id].add(str(boost::format{"Sonar %1% Range Checker"} % id),
-        &sonars[id], 
-        &Sonar::range_check);
-  }
-
-  for (auto& last_time : last_times) {
-    last_time = clock();
-  }
-
   while (ros::ok()) {
-    for (int id = 0; id < sonars.size(); id++) {
-      uint32_t elapsed_ticks = sonars[id].elapsed_ticks;
+    for (auto& sonar: sonars) {
+      uint32_t elapsed_ticks = sonar.elapsed_ticks;
       if (elapsed_ticks != 0) {
         // clear so we don't publish again
-        sonars[id].elapsed_ticks = 0;
+        sonar.elapsed_ticks = 0;
         // seconds = ticks / 1000000
         // speed of sound = 343 m/s
         // for round trip, halve the distance
         msg.range = (float)elapsed_ticks * 0.0001715;
-        sonars[id].range_error = (msg.range < min_range || msg.range > max_range);
+        sonar.range_error = (msg.range < min_range || msg.range > max_range);
         msg.header.stamp = ros::Time::now();
-        msg.header.frame_id = sonars[id].frame;
+        msg.header.frame_id = sonar.frame;
         pub.publish(msg);
-        sonars[id].pub.publish(msg);
-        pub_freq[id]->tick();
+        sonar.pub.publish(msg);
+        sonar.pub_freq->tick();
       }
-    }
-    for (auto& updater : updaters) {
-      updater.update();
+      sonar.updater->update();
     }
     rate.sleep();
   }
