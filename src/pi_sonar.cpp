@@ -40,12 +40,18 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
+double min_freq = 0.5;
+double max_freq = 60;
 
 class Sonar {
 public:
   // BCM GPIO pins
   int trigger_pin;
   int echo_pin;
+  int id;
 
   uint32_t start_tick;
   uint32_t elapsed_ticks;
@@ -53,22 +59,49 @@ public:
   std::string frame;
   ros::Publisher pub;
 
+  bool range_error = false;
+
+  std::unique_ptr<diagnostic_updater::Updater> updater;
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> pub_freq;
+ 
   Sonar(int trigger_pin, int echo_pin, int id, ros::NodeHandle& nh)
   {
     this->trigger_pin = trigger_pin;
     this->echo_pin = echo_pin;
+    this->id = id;
 
     start_tick = 0;
     elapsed_ticks = 0;
 
     frame = str(boost::format{"sonar_%1%"} % id);
     pub = nh.advertise<sensor_msgs::Range>(frame, 1);
+    
+    updater.reset(new diagnostic_updater::Updater());
+    updater->setHardwareIDf("sonar_%d",id);
+    pub_freq.reset(new diagnostic_updater::HeaderlessTopicDiagnostic(
+      str(boost::format{"/pi_sonar/sonar_%1%"} % id), 
+      *updater,
+      diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10))
+    );
+    updater->add(str(boost::format{"Sonar %1% Range Checker"} % id),
+      this,
+      &Sonar::range_check
+    );
+  }
+
+  void range_check(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (range_error) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Range out of bounds!");
+    }
+    else {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Range within bounds!");
+    }
   }
 };
 
 
 static std::vector<Sonar> sonars;
-
 
 /* Trigger the next sonar */
 void sonar_trigger()
@@ -118,7 +151,7 @@ int setup_gpio()
     gpioSetMode(sonar.echo_pin, PI_INPUT);
 
     /* monitor sonar echos */
-    gpioSetAlertFunc(sonar.echo_pin, echo_callback);
+    gpioSetAlertFunc(sonar.echo_pin,echo_callback);
   }
 
   /* update sonar 20 times a second, timer #0 */
@@ -165,7 +198,7 @@ int main(int argc, char *argv[])
   ROS_INFO("Pi Sonar node ready");
 
   while (ros::ok()) {
-    for (auto& sonar : sonars) {
+    for (auto& sonar: sonars) {
       uint32_t elapsed_ticks = sonar.elapsed_ticks;
       if (elapsed_ticks != 0) {
         // clear so we don't publish again
@@ -174,11 +207,14 @@ int main(int argc, char *argv[])
         // speed of sound = 343 m/s
         // for round trip, halve the distance
         msg.range = (float)elapsed_ticks * 0.0001715;
+        sonar.range_error = (msg.range < min_range || msg.range > max_range);
         msg.header.stamp = ros::Time::now();
         msg.header.frame_id = sonar.frame;
         pub.publish(msg);
         sonar.pub.publish(msg);
+        sonar.pub_freq->tick();
       }
+      sonar.updater->update();
     }
     rate.sleep();
   }
