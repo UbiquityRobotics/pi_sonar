@@ -23,9 +23,10 @@ sudo chmod 4755 ~/catkin_ws/devel/lib/pi_sonar/pi_sonar
 To run:
 
 ```
-roslaunch pi_sonar pi_sonar.launch
+roslaunch pi_sonar ubiquity_sonar.launch
 ```
 
+## For developers only
 Update pigpio:
 
 git subtree pull --squash --prefix=pigpio https://github.com/joan2937/pigpio.git {ref to pull}
