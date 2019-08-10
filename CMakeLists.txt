@@ -43,6 +43,7 @@ endif()
 ## Install ##
 #############
 
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
 install(TARGETS pi_sonar
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -52,6 +53,7 @@ install(TARGETS pi_sonar
                 WORLD_READ WORLD_EXECUTE
                 SETUID SETGID
 )
+endif()
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(DIRECTORY launch/
