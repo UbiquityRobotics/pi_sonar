@@ -95,40 +95,44 @@ the pigpio.pi class.
 
 OVERVIEW
 
-Essential
+ESSENTIAL
 
 pigpio.pi                 Initialise Pi connection
 stop                      Stop a Pi connection
 
-Beginner
+BASIC
 
 set_mode                  Set a GPIO mode
 get_mode                  Get a GPIO mode
+
 set_pull_up_down          Set/clear GPIO pull up/down resistor
 
 read                      Read a GPIO
 write                     Write a GPIO
 
+PWM_(overrides_servo_commands_on_same_GPIO)
+
 set_PWM_dutycycle         Start/stop PWM pulses on a GPIO
+set_PWM_frequency         Set PWM frequency of a GPIO
+set_PWM_range             Configure PWM range of a GPIO
+
 get_PWM_dutycycle         Get PWM dutycycle set on a GPIO
+get_PWM_frequency         Get PWM frequency of a GPIO
+get_PWM_range             Get configured PWM range of a GPIO
+
+get_PWM_real_range        Get underlying PWM range for a GPIO
+
+Servo_(overrides_PWM_commands_on_same_GPIO)
 
 set_servo_pulsewidth      Start/Stop servo pulses on a GPIO
+
 get_servo_pulsewidth      Get servo pulsewidth set on a GPIO
 
-callback                  Create GPIO level change callback
-wait_for_edge             Wait for GPIO level change
-
-Intermediate
+INTERMEDIATE
 
 gpio_trigger              Send a trigger pulse to a GPIO
 
 set_watchdog              Set a watchdog on a GPIO
-
-set_PWM_range             Configure PWM range of a GPIO
-get_PWM_range             Get configured PWM range of a GPIO
-
-set_PWM_frequency         Set PWM frequency of a GPIO
-get_PWM_frequency         Get PWM frequency of a GPIO
 
 read_bank_1               Read all bank 1 GPIO
 read_bank_2               Read all bank 2 GPIO
@@ -139,30 +143,41 @@ clear_bank_2              Clear selected GPIO in bank 2
 set_bank_1                Set selected GPIO in bank 1
 set_bank_2                Set selected GPIO in bank 2
 
-Advanced
+callback                  Create GPIO level change callback
 
-get_PWM_real_range        Get underlying PWM range for a GPIO
+wait_for_edge             Wait for GPIO level change
+
+ADVANCED
 
 notify_open               Request a notification handle
 notify_begin              Start notifications for selected GPIO
 notify_pause              Pause notifications
 notify_close              Close a notification
 
-bb_serial_read_open       Open a GPIO for bit bang serial reads
-bb_serial_read            Read bit bang serial data from  a GPIO
-bb_serial_read_close      Close a GPIO for bit bang serial reads
-bb_serial_invert          Invert serial logic (1 invert, 0 normal)
-
 hardware_clock            Start hardware clock on supported GPIO
+
 hardware_PWM              Start hardware PWM on supported GPIO
 
 set_glitch_filter         Set a glitch filter on a GPIO
 set_noise_filter          Set a noise filter on a GPIO
 
-get_pad_strength          Gets a pads drive strength
 set_pad_strength          Sets a pads drive strength
+get_pad_strength          Gets a pads drive strength
 
 shell                     Executes a shell command
+
+Custom
+
+custom_1                  User custom function 1
+custom_2                  User custom function 2
+
+Events
+
+event_callback            Sets a callback for an event
+
+event_trigger             Triggers an event
+
+wait_for_event            Wait for an event
 
 Scripts
 
@@ -173,7 +188,98 @@ script_status             Get script status and parameters
 stop_script               Stop a running script
 delete_script             Delete a stored script
 
-Waves
+I2C
+
+i2c_open                  Opens an I2C device
+i2c_close                 Closes an I2C device
+
+i2c_write_quick           SMBus write quick
+
+i2c_read_byte             SMBus read byte
+i2c_write_byte            SMBus write byte
+
+i2c_read_byte_data        SMBus read byte data
+i2c_write_byte_data       SMBus write byte data
+
+i2c_read_word_data        SMBus read word data
+i2c_write_word_data       SMBus write word data
+
+i2c_read_block_data       SMBus read block data
+i2c_write_block_data      SMBus write block data
+
+i2c_read_i2c_block_data   SMBus read I2C block data
+i2c_write_i2c_block_data  SMBus write I2C block data
+
+i2c_read_device           Reads the raw I2C device
+i2c_write_device          Writes the raw I2C device
+
+i2c_process_call          SMBus process call
+i2c_block_process_call    SMBus block process call
+
+i2c_zip                   Performs multiple I2C transactions
+
+I2C_BIT_BANG
+
+bb_i2c_open               Opens GPIO for bit banging I2C
+bb_i2c_close              Closes GPIO for bit banging I2C
+
+bb_i2c_zip                Performs multiple bit banged I2C transactions
+
+I2C/SPI_SLAVE
+
+bsc_xfer                  I2C/SPI as slave transfer
+bsc_i2c                   I2C as slave transfer
+
+SERIAL
+
+serial_open               Opens a serial device
+serial_close              Closes a serial device
+
+serial_read_byte          Reads a byte from a serial device
+serial_write_byte         Writes a byte to a serial device
+
+serial_read               Reads bytes from a serial device
+serial_write              Writes bytes to a serial device
+
+serial_data_available     Returns number of bytes ready to be read
+
+SERIAL_BIT_BANG_(read_only)
+
+bb_serial_read_open       Open a GPIO for bit bang serial reads
+bb_serial_read_close      Close a GPIO for bit bang serial reads
+
+bb_serial_invert          Invert serial logic (1 invert, 0 normal)
+
+bb_serial_read            Read bit bang serial data from  a GPIO
+
+SPI
+
+spi_open                  Opens a SPI device
+spi_close                 Closes a SPI device
+
+spi_read                  Reads bytes from a SPI device
+spi_write                 Writes bytes to a SPI device
+spi_xfer                  Transfers bytes with a SPI device
+
+SPI_BIT_BANG
+
+bb_spi_open               Opens GPIO for bit banging SPI
+bb_spi_close              Closes GPIO for bit banging SPI
+bb_spi_xfer               Transfers bytes with bit banging SPI
+
+FILES
+
+file_open                 Opens a file
+file_close                Closes a file
+
+file_read                 Reads bytes from a file
+file_write                Writes bytes to a file
+
+file_seek                 Seeks to a position within a file
+
+file_list                 List files which match a pattern
+
+WAVES
 
 wave_clear                Deletes all waveforms
 
@@ -191,97 +297,21 @@ wave_send_using_mode      Transmits a waveform in the chosen mode
 wave_chain                Transmits a chain of waveforms
 
 wave_tx_at                Returns the current transmitting waveform
+
 wave_tx_busy              Checks to see if a waveform has ended
+
 wave_tx_stop              Aborts the current waveform
 
-wave_get_micros           Length in microseconds of the current waveform
-wave_get_max_micros       Absolute maximum allowed micros
-wave_get_pulses           Length in pulses of the current waveform
-wave_get_max_pulses       Absolute maximum allowed pulses
 wave_get_cbs              Length in cbs of the current waveform
 wave_get_max_cbs          Absolute maximum allowed cbs
 
-I2C
+wave_get_micros           Length in microseconds of the current waveform
+wave_get_max_micros       Absolute maximum allowed micros
 
-i2c_open                  Opens an I2C device
-i2c_close                 Closes an I2C device
+wave_get_pulses           Length in pulses of the current waveform
+wave_get_max_pulses       Absolute maximum allowed pulses
 
-i2c_write_quick           SMBus write quick
-i2c_write_byte            SMBus write byte
-i2c_read_byte             SMBus read byte
-i2c_write_byte_data       SMBus write byte data
-i2c_write_word_data       SMBus write word data
-i2c_read_byte_data        SMBus read byte data
-i2c_read_word_data        SMBus read word data
-i2c_process_call          SMBus process call
-i2c_write_block_data      SMBus write block data
-i2c_read_block_data       SMBus read block data
-i2c_block_process_call    SMBus block process call
-
-i2c_read_i2c_block_data   SMBus read I2C block data
-i2c_write_i2c_block_data  SMBus write I2C block data
-
-i2c_read_device           Reads the raw I2C device
-i2c_write_device          Writes the raw I2C device
-
-i2c_zip                   Performs multiple I2C transactions
-
-bb_i2c_open               Opens GPIO for bit banging I2C
-bb_i2c_close              Closes GPIO for bit banging I2C
-bb_i2c_zip                Performs multiple bit banged I2C transactions
-
-SPI
-
-spi_open                  Opens a SPI device
-spi_close                 Closes a SPI device
-
-spi_read                  Reads bytes from a SPI device
-spi_write                 Writes bytes to a SPI device
-spi_xfer                  Transfers bytes with a SPI device
-
-bb_spi_open               Opens GPIO for bit banging SPI
-bb_spi_close              Closes GPIO for bit banging SPI
-bb_spi_xfer               Transfers bytes with bit banging SPI
-
-I2C/SPI_Slave
-
-bsc_xfer                  I2C/SPI as slave transfer
-bsc_i2c                   I2C as slave transfer
-
-Serial
-
-serial_open               Opens a serial device
-serial_close              Closes a serial device
-
-serial_read               Reads bytes from a serial device
-serial_read_byte          Reads a byte from a serial device
-
-serial_write              Writes bytes to a serial device
-serial_write_byte         Writes a byte to a serial device
-
-serial_data_available     Returns number of bytes ready to be read
-
-Files
-
-file_open                 Opens a file
-file_close                Closes a file
-file_read                 Reads bytes from a file
-file_write                Writes bytes to a file
-file_seek                 Seeks to a position within a file
-file_list                 List files which match a pattern
-
-Events
-
-event_callback            Sets a callback for an event
-event_trigger             Triggers an event
-wait_for_event            Wait for an event
-
-Custom
-
-custom_1                  User custom function 1
-custom_2                  User custom function 2
-
-Utility
+UTILITIES
 
 get_current_tick          Get current tick (microseconds)
 
@@ -300,7 +330,7 @@ import threading
 import os
 import atexit
 
-VERSION = "1.41"
+VERSION = "1.45"
 
 exceptions = True
 
@@ -689,6 +719,8 @@ PI_BAD_SPI_BAUD     =-141
 PI_NOT_SPI_GPIO     =-142
 PI_BAD_EVENT_ID     =-143
 PI_CMD_INTERRUPTED  =-144
+PI_NOT_ON_BCM2711   =-145
+PI_ONLY_ON_BCM2711  =-146
 
 # pigpio error text
 
@@ -786,9 +818,9 @@ _errors=[
    [PI_NOT_SERVO_GPIO    , "GPIO is not in use for servo pulses"],
    [PI_NOT_HCLK_GPIO     , "GPIO has no hardware clock"],
    [PI_NOT_HPWM_GPIO     , "GPIO has no hardware PWM"],
-   [PI_BAD_HPWM_FREQ     , "hardware PWM frequency not 1-125M"],
+   [PI_BAD_HPWM_FREQ     , "invalid hardware PWM frequency"],
    [PI_BAD_HPWM_DUTY     , "hardware PWM dutycycle not 0-1M"],
-   [PI_BAD_HCLK_FREQ     , "hardware clock frequency not 4689-250M"],
+   [PI_BAD_HCLK_FREQ     , "invalid hardware clock frequency"],
    [PI_BAD_HCLK_PASS     , "need password to use hardware clock 1"],
    [PI_HPWM_ILLEGAL      , "illegal, PWM in use for main clock"],
    [PI_BAD_DATABITS      , "serial data bits not 1-32"],
@@ -835,6 +867,8 @@ _errors=[
    [PI_NOT_SPI_GPIO      , "no bit bang SPI in progress on GPIO"],
    [PI_BAD_EVENT_ID      , "bad event id"],
    [PI_CMD_INTERRUPTED   , "pigpio command interrupted"],
+   [PI_NOT_ON_BCM2711    , "not available on BCM2711"],
+   [PI_ONLY_ON_BCM2711   , "only available on BCM2711"],
 ]
 
 _except_a = "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n{}"
@@ -1905,7 +1939,7 @@ class pi():
       Frequencies above 30MHz are unlikely to work.
 
          gpio:= see description
-      clkfreq:= 0 (off) or 4689-250000000 (250M)
+      clkfreq:= 0 (off) or 4689-250M (13184-375M for the BCM2711)
 
 
       Returns 0 if OK, otherwise PI_NOT_PERMITTED, PI_BAD_GPIO,
@@ -1955,7 +1989,7 @@ class pi():
       pigpio daemon is started (option -t).
 
          gpio:= see descripton
-      PWMfreq:= 0 (off) or 1-125000000 (125M).
+      PWMfreq:= 0 (off) or 1-125M (1-187.5M for the BCM2711).
       PWMduty:= 0 (off) to 1000000 (1M)(fully on).
 
       Returns 0 if OK, otherwise PI_NOT_PERMITTED, PI_BAD_GPIO,
@@ -1981,14 +2015,15 @@ class pi():
       . .
 
       The actual number of steps beween off and fully on is the
-      integral part of 250 million divided by PWMfreq.
+      integral part of 250M/PWMfreq (375M/PWMfreq for the BCM2711).
 
-      The actual frequency set is 250 million / steps.
+      The actual frequency set is 250M/steps (375M/steps
+      for the BCM2711).
 
-      There will only be a million steps for a PWMfreq of 250.
-      Lower frequencies will have more steps and higher
-      frequencies will have fewer steps.  PWMduty is
-      automatically scaled to take this into account.
+      There will only be a million steps for a PWMfreq of 250
+      (375 for the BCM2711). Lower frequencies will have more
+      steps and higher frequencies will have fewer steps.
+      PWMduty is automatically scaled to take this into account.
 
       ...
       pi.hardware_PWM(18, 800, 250000) # 800Hz 25% dutycycle
@@ -2191,8 +2226,8 @@ class pi():
 
       The bytes required for each character depend upon [*bb_bits*].
 
-      For [*bb_bits*] 1-8 there will be one byte per character. 
-      For [*bb_bits*] 9-16 there will be two bytes per character. 
+      For [*bb_bits*] 1-8 there will be one byte per character.
+      For [*bb_bits*] 9-16 there will be two bytes per character.
       For [*bb_bits*] 17-32 there will be four bytes per character.
 
       ...
@@ -2253,8 +2288,8 @@ class pi():
 
       A pulse specifies
 
-      1) the GPIO to be switched on at the start of the pulse. 
-      2) the GPIO to be switched off at the start of the pulse. 
+      1) the GPIO to be switched on at the start of the pulse.
+      2) the GPIO to be switched off at the start of the pulse.
       3) the delay in microseconds before the next pulse.
 
       Any or all the fields can be zero.  It doesn't make any sense
@@ -2389,7 +2424,7 @@ class pi():
       Returns the waveform id or one of the following special
       values:
 
-      WAVE_NOT_FOUND (9998) - transmitted wave not found. 
+      WAVE_NOT_FOUND (9998) - transmitted wave not found.
       NO_TX_WAVE (9999) - no wave being transmitted.
 
       ...
@@ -2598,14 +2633,15 @@ class pi():
       i2c_address:= 0-0x7F.
         i2c_flags:= 0, no flags are currently defined.
 
-      Normally you would only use the [*i2c_**] functions if
-      you are or will be connecting to the Pi over a network.  If
-      you will always run on the local Pi use the standard SMBus
-      module instead.
-
       Physically buses 0 and 1 are available on the Pi.  Higher
       numbered buses will be available if a kernel supported bus
       multiplexor is being used.
+
+      The GPIO used are given in the following table.
+
+            @ SDA @ SCL
+      I2C 0 @  0  @  1
+      I2C 1 @  2  @  3
 
       For the SMBus commands the low level transactions are shown
       at the end of the function description.  The following
@@ -2615,7 +2651,7 @@ class pi():
       S     (1 bit) : Start bit
       P     (1 bit) : Stop bit
       Rd/Wr (1 bit) : Read/Write bit. Rd equals 1, Wr equals 0.
-      A, NA (1 bit) : Accept and not accept bit. 
+      A, NA (1 bit) : Accept and not accept bit.
       Addr  (7 bits): I2C 7 bit address.
       reg   (8 bits): Command byte, which often selects a register.
       Data  (8 bits): A data byte.
@@ -3186,7 +3222,7 @@ class pi():
           SCLK := 0-31
           baud := 50-250000
       spiFlags := see below
-      
+
       spiFlags consists of the least significant 22 bits.
 
       . .
@@ -3249,7 +3285,7 @@ class pi():
       # I SCLK
       # I baud
       # I spi_flags
-      
+
       extents = [struct.pack("IIIII", MISO, MOSI, SCLK, baud, spi_flags)]
       return _u2i(_pigpio_command_ext(
          self.sl, _PI_CMD_BSPIO, CS, 0, 20, extents))
@@ -3351,9 +3387,9 @@ class pi():
       Bit banging I2C allows for certain operations which are not possible
       with the standard I2C driver.
 
-      o baud rates as low as 50 
-      o repeated starts 
-      o clock stretching 
+      o baud rates as low as 50
+      o repeated starts
+      o clock stretching
       o I2C on any pair of spare GPIO
 
        SDA:= 0-31
@@ -3508,9 +3544,21 @@ class pi():
 
    def bsc_xfer(self, bsc_control, data):
       """
-      This function provides a low-level interface to the
-      SPI/I2C Slave peripheral.  This peripheral allows the
-      Pi to act as a slave device on an I2C or SPI bus.
+      This function provides a low-level interface to the SPI/I2C Slave
+      peripheral on the BCM chip.
+
+      This peripheral allows the Pi to act as a hardware slave device
+      on an I2C or SPI bus.
+
+      This is not a bit bang version and as such is OS timing
+      independent. The bus timing is handled directly by the chip.
+
+      The output process is simple. You simply append data to the FIFO
+      buffer on the chip.  This works like a queue, you add data to the
+      queue and the master removes it.
+
+      This function is not available on the BCM2711 (e.g. as
+      used in the Pi4B).
 
       I can't get SPI to work properly.  I tried with a
       control word of 0x303 and swapped MISO and MOSI.
@@ -3617,6 +3665,9 @@ class pi():
    def bsc_i2c(self, i2c_address, data=[]):
       """
       This function allows the Pi to act as a slave I2C device.
+
+      This function is not available on the BCM2711 (e.g. as
+      used in the Pi4B).
 
       The data bytes (if any) are written to the BSC transmit
       FIFO and the bytes in the BSC receive FIFO are returned.
@@ -3736,24 +3787,27 @@ class pi():
 
    def spi_open(self, spi_channel, baud, spi_flags=0):
       """
-      Returns a handle for the SPI device on channel.  Data will be
-      transferred at baud bits per second.  The flags may be used to
-      modify the default behaviour of 4-wire operation, mode 0,
-      active low chip select.
+      Returns a handle for the SPI device on the channel.  Data
+      will be transferred at baud bits per second.  The flags
+      may be used to modify the default behaviour of 4-wire
+      operation, mode 0, active low chip select.
 
-      An auxiliary SPI device is available on all models but the
-      A and B and may be selected by setting the A bit in the
-      flags. The auxiliary device has 3 chip selects and a
-      selectable word size in bits.
+      The Pi has two SPI peripherals: main and auxiliary.
 
-      spi_channel:= 0-1 (0-2 for the auxiliary SPI device).
+      The main SPI has two chip selects (channels), the auxiliary
+      has three.
+
+      The auxiliary SPI is available on all models but the A and B.
+
+      The GPIO used are given in the following table.
+
+               @ MISO @ MOSI @ SCLK @ CE0 @ CE1 @ CE2
+      Main SPI @    9 @   10 @   11 @   8 @   7 @   -
+      Aux SPI  @   19 @   20 @   21 @  18 @  17 @  16
+
+      spi_channel:= 0-1 (0-2 for the auxiliary SPI).
              baud:= 32K-125M (values above 30M are unlikely to work).
         spi_flags:= see below.
-
-      Normally you would only use the [*spi_**] functions if
-      you are or will be connecting to the Pi over a network.  If
-      you will always run on the local Pi use the standard SPI
-      module instead.
 
       spi_flags consists of the least significant 22 bits.
 
@@ -3765,7 +3819,7 @@ class pi():
       mm defines the SPI mode.
 
       WARNING: modes 1 and 3 do not appear to work on
-      the auxiliary device.
+      the auxiliary SPI.
 
       . .
       Mode POL PHA
@@ -3780,32 +3834,32 @@ class pi():
       ux is 0 if the CEx GPIO is reserved for SPI (default)
       and 1 otherwise.
 
-      A is 0 for the standard SPI device, 1 for the auxiliary SPI.
+      A is 0 for the main SPI, 1 for the auxiliary SPI.
 
       W is 0 if the device is not 3-wire, 1 if the device is 3-wire.
-      Standard SPI device only.
+      Main SPI only.
 
       nnnn defines the number of bytes (0-15) to write before
       switching the MOSI line to MISO to read data.  This field
-      is ignored if W is not set.  Standard SPI device only.
+      is ignored if W is not set.  Main SPI only.
 
       T is 1 if the least significant bit is transmitted on MOSI
       first, the default (0) shifts the most significant bit out
-      first.  Auxiliary SPI device only.
+      first.  Auxiliary SPI only.
 
       R is 1 if the least significant bit is received on MISO
       first, the default (0) receives the most significant bit
-      first.  Auxiliary SPI device only.
+      first.  Auxiliary SPI only.
 
       bbbbbb defines the word size in bits (0-32).  The default (0)
-      sets 8 bits per word.  Auxiliary SPI device only.
+      sets 8 bits per word.  Auxiliary SPI only.
 
       The [*spi_read*], [*spi_write*], and [*spi_xfer*] functions
       transfer data packed into 1, 2, or 4 bytes according to
       the word size in bits.
 
-      For bits 1-8 there will be one byte per character. 
-      For bits 9-16 there will be two bytes per character. 
+      For bits 1-8 there will be one byte per character.
+      For bits 9-16 there will be two bytes per character.
       For bits 17-32 there will be four bytes per character.
 
       Multi-byte transfers are made in least significant byte
@@ -4377,8 +4431,8 @@ class pi():
       data bits [*bb_bits*] specified in the [*bb_serial_read_open*]
       command.
 
-      For [*bb_bits*] 1-8 there will be one byte per character. 
-      For [*bb_bits*] 9-16 there will be two bytes per character. 
+      For [*bb_bits*] 1-8 there will be one byte per character.
+      For [*bb_bits*] 9-16 there will be two bytes per character.
       For [*bb_bits*] 17-32 there will be four bytes per character.
 
       ...
@@ -4394,7 +4448,7 @@ class pi():
              rdata = self._rxbuf(bytes)
       return bytes, rdata
 
-   
+
    def bb_serial_read_close(self, user_gpio):
       """
       Closes a GPIO for bit bang reading of serial data.
@@ -5011,7 +5065,7 @@ class pi():
       host:= the host name of the Pi on which the pigpio daemon is
              running.  The default is localhost unless overridden by
              the PIGPIO_ADDR environment variable.
-       
+
       port:= the port number on which the pigpio daemon is listening.
              The default is 8888 unless overridden by the PIGPIO_PORT
              environment variable.  The pigpio daemon must have been
@@ -5080,7 +5134,7 @@ class pi():
 
             s = "Can't connect to pigpio at {}({})".format(host, str(port))
 
-         
+
             print(_except_a.format(s))
             if exception == 1:
                 print(_except_1)
@@ -5089,6 +5143,9 @@ class pi():
             else:
                 print(_except_3)
             print(_except_z)
+
+   def __repr__(self):
+      return "<pipio.pi host={} port={}>".format(self._host, self._port)
 
    def stop(self):
       """Release pigpio resources.
@@ -5167,7 +5224,7 @@ def xref():
    byte_val: 0-255
    A whole number.
 
-   clkfreq: 4689-250M
+   clkfreq: 4689-250M (13184-375M for the BCM2711)
    The hardware clock frequency.
 
    connected:
@@ -5201,8 +5258,8 @@ def xref():
    edge: 0-2
 
    . .
-   EITHER_EDGE = 2 
-   FALLING_EDGE = 1 
+   EITHER_EDGE = 2
+   FALLING_EDGE = 1
    RISING_EDGE = 0
    . .
 
@@ -5323,6 +5380,8 @@ def xref():
    PI_NOT_SPI_GPIO = -142
    PI_BAD_EVENT_ID = -143
    PI_CMD_INTERRUPTED = -144
+   PI_NOT_ON_BCM2711   = -145
+   PI_ONLY_ON_BCM2711  = -146
    . .
 
    event:0-31
@@ -5405,17 +5464,14 @@ def xref():
    handle: >=0
    A number referencing an object opened by one of the following
 
-   [*file_open*] 
-   [*i2c_open*] 
-   [*notify_open*] 
-   [*serial_open*] 
+   [*file_open*]
+   [*i2c_open*]
+   [*notify_open*]
+   [*serial_open*]
    [*spi_open*]
 
    host:
    The name or IP address of the Pi running the pigpio daemon.
-
-   i2c_*:
-   One of the i2c_ functions.
 
    i2c_address: 0-0x7F
    The address of a device on the I2C bus.
@@ -5433,12 +5489,12 @@ def xref():
    level: 0-1 (2)
 
    . .
-   CLEAR = 0 
-   HIGH = 1 
-   LOW = 0 
-   OFF = 0 
-   ON = 1 
-   SET = 1 
+   CLEAR = 0
+   HIGH = 1
+   LOW = 0
+   OFF = 0
+   ON = 1
+   SET = 1
    TIMEOUT = 2 # only returned for a watchdog timeout
    . .
 
@@ -5450,22 +5506,22 @@ def xref():
    1.The operational mode of a GPIO, normally INPUT or OUTPUT.
 
    . .
-   ALT0 = 4 
-   ALT1 = 5 
-   ALT2 = 6 
-   ALT3 = 7 
-   ALT4 = 3 
-   ALT5 = 2 
-   INPUT = 0 
+   ALT0 = 4
+   ALT1 = 5
+   ALT2 = 6
+   ALT3 = 7
+   ALT4 = 3
+   ALT5 = 2
+   INPUT = 0
    OUTPUT = 1
    . .
 
    2. The mode of waveform transmission.
 
    . .
-   WAVE_MODE_ONE_SHOT = 0 
-   WAVE_MODE_REPEAT = 1 
-   WAVE_MODE_ONE_SHOT_SYNC = 2 
+   WAVE_MODE_ONE_SHOT = 0
+   WAVE_MODE_REPEAT = 1
+   WAVE_MODE_ONE_SHOT_SYNC = 2
    WAVE_MODE_REPEAT_SYNC = 3
    . .
 
@@ -5492,7 +5548,7 @@ def xref():
    When scripts are started they can receive up to 10 parameters
    to define their operation.
 
-   port: 
+   port:
    The port used by the pigpio daemon, defaults to 8888.
 
    pstring:
@@ -5500,9 +5556,9 @@ def xref():
 
    pud: 0-2
    . .
-   PUD_DOWN = 1 
-   PUD_OFF = 0 
-   PUD_UP = 2 
+   PUD_DOWN = 1
+   PUD_OFF = 0
+   PUD_UP = 2
    . .
 
    pulse_len: 1-100
@@ -5518,7 +5574,7 @@ def xref():
    PWMduty: 0-1000000 (1M)
    The hardware PWM dutycycle.
 
-   PWMfreq: 1-125000000 (125M)
+   PWMfreq: 1-125M (1-187.5M for the BCM2711)
    The hardware PWM frequency.
 
    range_: 25-40000
@@ -5553,9 +5609,9 @@ def xref():
    Direction to seek for [*file_seek*].
 
    . .
-   FROM_START=0 
-   FROM_CURRENT=1 
-   FROM_END=2 
+   FROM_START=0
+   FROM_CURRENT=1
+   FROM_END=2
    . .
 
    seek_offset:
@@ -5576,9 +5632,6 @@ def xref():
    Controls the display of pigpio daemon connection failures.
    The default of True prints the probable failure reasons to
    standard output.
-
-   spi_*:
-   One of the spi_ functions.
 
    spi_channel: 0-2
    A SPI channel.
@@ -5621,8 +5674,8 @@ def xref():
    wave_add_*:
    One of the following
 
-   [*wave_add_new*] 
-   [*wave_add_generic*] 
+   [*wave_add_new*]
+   [*wave_add_generic*]
    [*wave_add_serial*]
 
    wave_id: >=0
@@ -5631,7 +5684,7 @@ def xref():
    wave_send_*:
    One of the following
 
-   [*wave_send_once*] 
+   [*wave_send_once*]
    [*wave_send_repeat*]
 
    wdog_timeout: 0-60000
