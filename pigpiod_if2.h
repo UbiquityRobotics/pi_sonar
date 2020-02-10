@@ -30,7 +30,7 @@ For more information, please refer to <http://unlicense.org/>
 
 #include "pigpio.h"
 
-#define PIGPIOD_IF2_VERSION 13
+#define PIGPIOD_IF2_VERSION 16
 
 /*TEXT
 
@@ -104,7 +104,7 @@ ESSENTIAL
 pigpio_start               Connects to a pigpio daemon
 pigpio_stop                Disconnects from a pigpio daemon
 
-BEGINNER
+BASIC
 
 set_mode                   Set a GPIO mode
 get_mode                   Get a GPIO mode
@@ -114,28 +114,29 @@ set_pull_up_down           Set/clear GPIO pull up/down resistor
 gpio_read                  Read a GPIO
 gpio_write                 Write a GPIO
 
+PWM_(overrides_servo_commands_on_same_GPIO)
+
 set_PWM_dutycycle          Start/stop PWM pulses on a GPIO
+set_PWM_frequency          Configure PWM frequency for a GPIO
+set_PWM_range              Configure PWM range for a GPIO
+
 get_PWM_dutycycle          Get the PWM dutycycle in use on a GPIO
+get_PWM_frequency          Get configured PWM frequency for a GPIO
+get_PWM_range              Get configured PWM range for a GPIO
+
+get_PWM_real_range         Get underlying PWM range for a GPIO
+
+Servo_(overrides_PWM_commands_on_same_GPIO)
 
 set_servo_pulsewidth       Start/stop servo pulses on a GPIO
-get_servo_pulsewidth       Get the servo pulsewidth in use on a GPIO
 
-callback                   Create GPIO level change callback
-callback_ex                Create GPIO level change callback, extended
-callback_cancel            Cancel a callback
-wait_for_edge              Wait for GPIO level change
+get_servo_pulsewidth       Get the servo pulsewidth in use on a GPIO
 
 INTERMEDIATE
 
 gpio_trigger               Send a trigger pulse to a GPIO.
 
 set_watchdog               Set a watchdog on a GPIO.
-
-set_PWM_range              Configure PWM range for a GPIO
-get_PWM_range              Get configured PWM range for a GPIO
-
-set_PWM_frequency          Configure PWM frequency for a GPIO
-get_PWM_frequency          Get configured PWM frequency for a GPIO
 
 read_bank_1                Read all GPIO in bank 1
 read_bank_2                Read all GPIO in bank 2
@@ -146,35 +147,52 @@ clear_bank_2               Clear selected GPIO in bank 2
 set_bank_1                 Set selected GPIO in bank 1
 set_bank_2                 Set selected GPIO in bank 2
 
+callback                   Create GPIO level change callback
+callback_ex                Create GPIO level change callback, extended
+
+callback_cancel            Cancel a callback
+
+wait_for_edge              Wait for GPIO level change
+
 start_thread               Start a new thread
 stop_thread                Stop a previously started thread
 
 ADVANCED
-
-get_PWM_real_range         Get underlying PWM range for a GPIO
 
 notify_open                Request a notification handle
 notify_begin               Start notifications for selected GPIO
 notify_pause               Pause notifications
 notify_close               Close a notification
 
-bb_serial_read_open        Opens a GPIO for bit bang serial reads
-bb_serial_read             Reads bit bang serial data from a GPIO
-bb_serial_read_close       Closes a GPIO for bit bang serial reads
-bb_serial_invert           Invert serial logic (1 invert, 0 normal)
-
 hardware_clock             Start hardware clock on supported GPIO
+
 hardware_PWM               Start hardware PWM on supported GPIO
 
 set_glitch_filter          Set a glitch filter on a GPIO
 set_noise_filter           Set a noise filter on a GPIO
 
-get_pad_strength           Gets a pads drive strength
 set_pad_strength           Sets a pads drive strength
+get_pad_strength           Gets a pads drive strength
 
 shell_                     Executes a shell command
 
-SCRIPTS
+Custom
+
+custom_1                   User custom function 1
+custom_2                   User custom function 2
+
+Events
+
+event_callback            Sets a callback for an event
+event_callback_ex         Sets a callback for an event, extended
+
+event_callback_cancel     Cancel an event callback
+
+event_trigger             Triggers an event
+
+wait_for_event            Wait for an event
+
+Scripts
 
 store_script               Store a script
 run_script                 Run a stored script
@@ -182,6 +200,98 @@ update_script              Set a scripts parameters
 script_status              Get script status and parameters
 stop_script                Stop a running script
 delete_script              Delete a stored script
+
+I2C
+
+i2c_open                   Opens an I2C device
+i2c_close                  Closes an I2C device
+
+i2c_write_quick            smbus write quick
+
+i2c_read_byte              smbus read byte
+i2c_write_byte             smbus write byte
+
+i2c_read_byte_data         smbus read byte data
+i2c_write_byte_data        smbus write byte data
+
+i2c_read_word_data         smbus read word data
+i2c_write_word_data        smbus write word data
+
+i2c_read_block_data        smbus read block data
+i2c_write_block_data       smbus write block data
+
+i2c_read_i2c_block_data    smbus read I2C block data
+i2c_write_i2c_block_data   smbus write I2C block data
+
+i2c_read_device            Reads the raw I2C device
+i2c_write_device           Writes the raw I2C device
+
+i2c_process_call           smbus process call
+i2c_block_process_call     smbus block process call
+
+i2c_zip                    Performs multiple I2C transactions
+
+I2C_BIT_BANG
+
+bb_i2c_open                Opens GPIO for bit banging I2C
+bb_i2c_close               Closes GPIO for bit banging I2C
+
+bb_i2c_zip                 Performs bit banged I2C transactions
+
+I2C/SPI_SLAVE
+
+bsc_xfer                   I2C/SPI as slave transfer
+bsc_i2c                    I2C as slave transfer
+
+SERIAL
+
+serial_open                Opens a serial device
+serial_close               Closes a serial device
+
+serial_read_byte           Reads a byte from a serial device
+serial_write_byte          Writes a byte to a serial device
+
+serial_read                Reads bytes from a serial device
+serial_write               Writes bytes to a serial device
+
+serial_data_available      Returns number of bytes ready to be read
+
+SERIAL_BIT_BANG_(read_only)
+
+bb_serial_read_open        Opens a GPIO for bit bang serial reads
+bb_serial_read_close       Closes a GPIO for bit bang serial reads
+
+bb_serial_invert           Invert serial logic (1 invert, 0 normal)
+
+bb_serial_read             Reads bit bang serial data from a GPIO
+
+SPI
+
+spi_open                   Opens a SPI device
+spi_close                  Closes a SPI device
+
+spi_read                   Reads bytes from a SPI device
+spi_write                  Writes bytes to a SPI device
+spi_xfer                   Transfers bytes with a SPI device
+
+SPI_BIT_BANG
+
+bb_spi_open                Opens GPIO for bit banging SPI
+bb_spi_close               Closes GPIO for bit banging SPI
+
+bb_spi_xfer                Transfers bytes with bit banging SPI
+
+FILES
+
+file_open                  Opens a file
+file_close                 Closes a file
+
+file_read                  Reads bytes from a file
+file_write                 Writes bytes to a file
+
+file_seek                  Seeks to a position within a file
+
+file_list                  List files which match a pattern
 
 WAVES
 
@@ -201,101 +311,22 @@ wave_send_using_mode       Transmits a waveform in the chosen mode
 wave_chain                 Transmits a chain of waveforms
 
 wave_tx_at                 Returns the current transmitting waveform
+
 wave_tx_busy               Checks to see if the waveform has ended
+
 wave_tx_stop               Aborts the current waveform
 
-wave_get_micros            Length in microseconds of the current waveform
+wave_get_cbs               Length in cbs of the current waveform
+wave_get_high_cbs          Length of longest waveform so far
+wave_get_max_cbs           Absolute maximum allowed cbs
+
+wave_get_micros            Length in micros of the current waveform
 wave_get_high_micros       Length of longest waveform so far
 wave_get_max_micros        Absolute maximum allowed micros
 
 wave_get_pulses            Length in pulses of the current waveform
 wave_get_high_pulses       Length of longest waveform so far
 wave_get_max_pulses        Absolute maximum allowed pulses
-
-wave_get_cbs               Length in cbs of the current waveform
-wave_get_high_cbs          Length of longest waveform so far
-wave_get_max_cbs           Absolute maximum allowed cbs
-
-I2C
-
-i2c_open                   Opens an I2C device
-i2c_close                  Closes an I2C device
-
-i2c_write_quick            smbus write quick
-i2c_write_byte             smbus write byte
-i2c_read_byte              smbus read byte
-i2c_write_byte_data        smbus write byte data
-i2c_write_word_data        smbus write word data
-i2c_read_byte_data         smbus read byte data
-i2c_read_word_data         smbus read word data
-i2c_process_call           smbus process call
-i2c_write_block_data       smbus write block data
-i2c_read_block_data        smbus read block data
-i2c_block_process_call     smbus block process call
-
-i2c_write_i2c_block_data   smbus write I2C block data
-i2c_read_i2c_block_data    smbus read I2C block data
-
-i2c_read_device            Reads the raw I2C device
-i2c_write_device           Writes the raw I2C device
-
-i2c_zip                    Performs multiple I2C transactions
-
-bb_i2c_open                Opens GPIO for bit banging I2C
-bb_i2c_close               Closes GPIO for bit banging I2C
-bb_i2c_zip                 Performs multiple bit banged I2C transactions
-
-SPI
-
-spi_open                   Opens a SPI device
-spi_close                  Closes a SPI device
-
-spi_read                   Reads bytes from a SPI device
-spi_write                  Writes bytes to a SPI device
-spi_xfer                   Transfers bytes with a SPI device
-
-bb_spi_open                Opens GPIO for bit banging SPI
-bb_spi_close               Closes GPIO for bit banging SPI
-bb_spi_xfer                Transfers bytes with bit banging SPI
-
-I2C/SPI_SLAVE
-
-bsc_xfer                   I2C/SPI as slave transfer
-bsc_i2c                    I2C as slave transfer
-
-SERIAL
-
-serial_open                Opens a serial device
-serial_close               Closes a serial device
-
-serial_write_byte          Writes a byte to a serial device
-serial_read_byte           Reads a byte from a serial device
-serial_write               Writes bytes to a serial device
-serial_read                Reads bytes from a serial device
-
-serial_data_available      Returns number of bytes ready to be read
-
-FILES
-
-file_open                  Opens a file
-file_close                 Closes a file
-file_read                  Reads bytes from a file
-file_write                 Writes bytes to a file
-file_seek                  Seeks to a position within a file
-file_list                  List files which match a pattern
-
-EVENTS
-
-event_callback            Sets a callback for an event
-event_callback_ex         Sets a callback for an event, extended
-event_callback_cancel     Cancel an event callback
-event_trigger             Triggers an event
-wait_for_event            Wait for an event
-
-CUSTOM
-
-custom_1                   User custom function 1
-custom_2                   User custom function 2
 
 UTILITIES
 
@@ -1049,7 +1080,7 @@ Frequencies above 30MHz are unlikely to work.
 . .
        pi: >=0 (as returned by [*pigpio_start*]).
      gpio: see description
-frequency: 0 (off) or 4689-250000000 (250M)
+frequency: 0 (off) or 4689-250M (13184-375M for the BCM2711)
 . .
 
 Returns 0 if OK, otherwise PI_NOT_PERMITTED, PI_BAD_GPIO,
@@ -1096,7 +1127,7 @@ daemon is started (option -t).
 . .
      pi: >=0 (as returned by [*pigpio_start*]).
    gpio: see descripton
-PWMfreq: 0 (off) or 1-125000000 (125M)
+PWMfreq: 0 (off) or 1-125M (1-187.5M for the BCM2711)
 PWMduty: 0 (off) to 1000000 (1M)(fully on)
 . .
 
@@ -1124,12 +1155,12 @@ The GPIO must be one of the following.
 . .
 
 The actual number of steps beween off and fully on is the
-integral part of 250 million divided by PWMfreq.
+integral part of 250M/PWMfreq (375M/PWMfreq for the BCM2711).
 
-The actual frequency set is 250 million / steps.
+The actual frequency set is 250M/steps (375M/steps for the BCM2711).
 
-There will only be a million steps for a PWMfreq of 250.
-Lower frequencies will have more steps and higher
+There will only be a million steps for a PWMfreq of 250 (375 for
+the BCM2711). Lower frequencies will have more steps and higher
 frequencies will have fewer steps.  PWMduty is
 automatically scaled to take this into account.
 D*/
@@ -1887,6 +1918,12 @@ No flags are currently defined.  This parameter should be set to zero.
 Physically buses 0 and 1 are available on the Pi.  Higher numbered buses
 will be available if a kernel supported bus multiplexor is being used.
 
+The GPIO used are given in the following table.
+
+      @ SDA @ SCL
+I2C 0 @  0  @  1
+I2C 1 @  2  @  3
+
 Returns a handle (>=0) if OK, otherwise PI_BAD_I2C_BUS, PI_BAD_I2C_ADDR,
 PI_BAD_FLAGS, PI_NO_HANDLE, or PI_I2C_OPEN_FAILED.
 
@@ -2601,19 +2638,27 @@ D*/
 /*F*/
 int spi_open(int pi, unsigned spi_channel, unsigned baud, unsigned spi_flags);
 /*D
-This function returns a handle for the SPI device on channel.
+This function returns a handle for the SPI device on the channel.
 Data will be transferred at baud bits per second.  The flags may
 be used to modify the default behaviour of 4-wire operation, mode 0,
 active low chip select.
 
-An auxiliary SPI device is available on all models but the
-A and B and may be selected by setting the A bit in the
-flags.  The auxiliary device has 3 chip selects and a
-selectable word size in bits.
+The Pi has two SPI peripherals: main and auxiliary.
+
+The main SPI has two chip selects (channels), the auxiliary has
+three.
+
+The auxiliary SPI is available on all models but the A and B.
+
+The GPIO used are given in the following table.
+
+         @ MISO @ MOSI @ SCLK @ CE0 @ CE1 @ CE2
+Main SPI @    9 @   10 @   11 @   8 @   7 @   -
+Aux SPI  @   19 @   20 @   21 @  18 @  17 @  16
 
 . .
          pi: >=0 (as returned by [*pigpio_start*]).
-spi_channel: 0-1 (0-2 for the auxiliary device).
+spi_channel: 0-1 (0-2 for the auxiliary SPI).
        baud: 32K-125M (values above 30M are unlikely to work).
   spi_flags: see below.
 . .
@@ -2630,7 +2675,7 @@ spi_flags consists of the least significant 22 bits.
 
 mm defines the SPI mode.
 
-Warning: modes 1 and 3 do not appear to work on the auxiliary device.
+Warning: modes 1 and 3 do not appear to work on the auxiliary SPI.
 
 . .
 Mode POL PHA
@@ -2644,25 +2689,25 @@ px is 0 if CEx is active low (default) and 1 for active high.
 
 ux is 0 if the CEx GPIO is reserved for SPI (default) and 1 otherwise.
 
-A is 0 for the standard SPI device, 1 for the auxiliary SPI.
+A is 0 for the main SPI, 1 for the auxiliary SPI.
 
-W is 0 if the device is not 3-wire, 1 if the device is 3-wire.  Standard
-SPI device only.
+W is 0 if the device is not 3-wire, 1 if the device is 3-wire.  Main
+SPI only.
 
 nnnn defines the number of bytes (0-15) to write before switching
 the MOSI line to MISO to read data.  This field is ignored
-if W is not set.  Standard SPI device only.
+if W is not set.  Main SPI only.
 
 T is 1 if the least significant bit is transmitted on MOSI first, the
 default (0) shifts the most significant bit out first.  Auxiliary SPI
-device only.
+only.
 
 R is 1 if the least significant bit is received on MISO first, the
 default (0) receives the most significant bit first.  Auxiliary SPI
-device only.
+only.
 
 bbbbbb defines the word size in bits (0-32).  The default (0)
-sets 8 bits per word.  Auxiliary SPI device only.
+sets 8 bits per word.  Auxiliary SPI only.
 
 The [*spi_read*], [*spi_write*], and [*spi_xfer*] functions
 transfer data packed into 1, 2, or 4 bytes according to
@@ -3384,9 +3429,21 @@ D*/
 /*F*/
 int bsc_xfer(int pi, bsc_xfer_t *bscxfer);
 /*D
-This function provides a low-level interface to the
-SPI/I2C Slave peripheral.  This peripheral allows the
-Pi to act as a slave device on an I2C or SPI bus.
+This function provides a low-level interface to the SPI/I2C Slave
+peripheral on the BCM chip.
+
+This peripheral allows the Pi to act as a hardware slave device
+on an I2C or SPI bus.
+
+This is not a bit bang version and as such is OS timing
+independent. The bus timing is handled directly by the chip.
+
+The output process is simple. You simply append data to the FIFO
+buffer on the chip.  This works like a queue, you add data to the
+queue and the master removes it.
+
+This function is not available on the BCM2711 (e.g. as
+used in the Pi4B).
 
 I can't get SPI to work properly.  I tried with a
 control word of 0x303 and swapped MISO and MOSI.
@@ -3410,8 +3467,9 @@ typedef struct
 } bsc_xfer_t;
 . .
 
-To start a transfer set control (see below) and copy the bytes to
-be sent (if any) to txBuf and set the byte count in txCnt.
+To start a transfer set control (see below), copy the bytes to
+be added to the transmit FIFO (if any) to txBuf and set txCnt to
+the number of copied bytes.
 
 Upon return rxCnt will be set to the number of received bytes placed
 in rxBuf.
@@ -3507,6 +3565,9 @@ D*/
 int bsc_i2c(int pi, int i2c_addr, bsc_xfer_t *bscxfer);
 /*D
 This function allows the Pi to act as a slave I2C device.
+
+This function is not available on the BCM2711 (e.g.as
+used in the Pi4B).
 
 The data bytes (if any) are written to the BSC transmit
 FIFO and the bytes in the BSC receive FIFO are returned.
@@ -3729,7 +3790,7 @@ typedef void (*CBFuncEx_t)
 char::
 A single character, an 8 bit quantity able to store 0-255.
 
-clkfreq::4689-250000000 (250M)
+clkfreq::4689-250M (13184-375M for the BCM2711)
 The hardware clock frequency.
 
 count::
@@ -4033,12 +4094,13 @@ The hardware PWM dutycycle.
 #define PI_HW_PWM_RANGE 1000000
 . .
 
-PWMfreq::1-125000000 (125M)
+PWMfreq::1-125M (1-187.5M for the BCM2711)
 The hardware PWM frequency.
 
 . .
 #define PI_HW_PWM_MIN_FREQ 1
 #define PI_HW_PWM_MAX_FREQ 125000000
+#define PI_HW_PWM_MAX_FREQ_2711 187500000
 . .
 
 range::25-40000
