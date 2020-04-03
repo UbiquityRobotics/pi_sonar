@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(pi_sonar)
 
+FIND_LIBRARY(pigpio REQUIRED)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -23,20 +25,19 @@ catkin_package(
 ###########
 
 
-include_directories(pigpio ${catkin_INCLUDE_DIRS})
+include_directories(
+  include
+  pigpio_INCLUDES
+  ${catkin_INCLUDE_DIRS}
+)
+
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
-  add_library(pigpio STATIC
-    pigpio/pigpio.c
-    pigpio/command.c 
-  )
-  target_compile_options(pigpio PRIVATE -std=c11 -fpic -O3)
-  target_link_libraries(pigpio pthread)
 
   add_executable(pi_sonar src/pi_sonar.cpp)
   target_compile_options(pi_sonar PRIVATE -std=c++11)
   target_link_libraries(pi_sonar ${catkin_LIBRARIES}
-                        ${roscpp_LIBRARIES} pigpio pthread)
+                        ${roscpp_LIBRARIES} pigpiod_if2 pthread)
 endif()
 
 #############
