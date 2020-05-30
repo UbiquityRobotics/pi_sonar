@@ -2,6 +2,11 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updating pigpio to v71 (`#11 <https://github.com/UbiquityRobotics/pi_sonar/issues/11>`_)
+* Contributors: Jim Vaughan, MoffKalast, Rohan Agrawal
+
 0.4.0 (2019-02-16)
 ------------------
 * fix incorrect launch file in the README
