@@ -2,6 +2,11 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removed pigpio, reworked code to work with pigpiod (`#12 <https://github.com/UbiquityRobotics/pi_sonar/issues/12>`_)
+* Contributors: Rohan Agrawal, MoffKalast
+
 0.5.0 (2020-05-30)
 ------------------
 * Updating pigpio to v71 (`#11 <https://github.com/UbiquityRobotics/pi_sonar/issues/11>`_)
