@@ -20,6 +20,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>diagnostic_updater</run_depend>
   <run_depend>libpigpiod-if</run_depend>
+  <run_depend>libpigpio</run_depend>
 
   <export>
   </export>
