@@ -2,6 +2,14 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added dependancy on libpigpiod-if
+* Contributors: Rohan Agrawal
+
+* Added dependancy on libpigpiod-if
+* Contributors: Rohan Agrawal
+
 0.6.0 (2020-05-31)
 ------------------
 * Removed pigpio, reworked code to work with pigpiod (`#12 <https://github.com/UbiquityRobotics/pi_sonar/issues/12>`_)

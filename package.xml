@@ -15,9 +15,11 @@
   <build_depend>diagnostic_updater</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>libpigpiod-if</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>diagnostic_updater</run_depend>
+  <run_depend>libpigpiod-if</run_depend>
 
   <export>
   </export>
