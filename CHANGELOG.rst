@@ -2,8 +2,8 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.6.3 (2020-05-31)
+------------------
 * Added dependancy on libpigpio for build and run
 * Contributors: Rohan Agrawal
 
