@@ -12,12 +12,13 @@ catkin_make
 source devel/setup.bash
 ```
 
-The node needs to run as the user root to access GPIO, hence the
-following unconventional steps:
+The node needs to access the pigpio daemon, hence the following steps to have it run at startup (if it does not do so already):
 
 ```
-sudo chown root ~/catkin_ws/devel/lib/pi_sonar/pi_sonar
-sudo chmod 4755 ~/catkin_ws/devel/lib/pi_sonar/pi_sonar
+wget https://raw.githubusercontent.com/joan2937/pigpio/master/util/pigpiod.service
+sudo cp pigpiod.service /etc/systemd/system
+sudo systemctl enable pigpiod.service
+sudo systemctl start pigpiod.service
 ```
 
 To run:
