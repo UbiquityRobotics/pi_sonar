@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>pi_sonar</name>
-  <version>0.6.3</version>
+  <version>0.6.4</version>
   <description>ROS package for running sonars off the Raspberry Pi</description>
 
   <maintainer email="ra@ubiquityrobotics.com">Rohan Agrawal</maintainer>
