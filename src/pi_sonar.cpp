@@ -39,6 +39,7 @@
 #include <sensor_msgs/Range.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
