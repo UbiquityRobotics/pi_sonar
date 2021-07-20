@@ -2,6 +2,12 @@
 Changelog for package pi_sonar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added boost format header to solve compile issues on 20.04 (`#17 <https://github.com/UbiquityRobotics/pi_sonar/issues/17>`_)
+* removed pigpio, reworked code to work with pigpiod
+* Contributors: MoffKalast, Rohan Agrawal
+
 0.6.3 (2020-05-31)
 ------------------
 * Added dependancy on libpigpio for build and run
