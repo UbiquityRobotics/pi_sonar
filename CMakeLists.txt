@@ -40,6 +40,10 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
                         ${roscpp_LIBRARIES} pigpiod_if2 pthread)
 endif()
 
+catkin_install_python (PROGRAMS scripts/sonar_testing.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 #############
 ## Install ##
 #############
