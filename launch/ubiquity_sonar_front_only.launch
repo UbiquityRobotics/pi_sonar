@@ -1,0 +1,11 @@
+<launch>
+  <!-- <node pkg="pi_sonar" type="pi_sonar" name="pi_sonar"/> -->
+  <node pkg="pi_sonar" type="pi_sonar" name="pi_sonar">
+    <param name="sonar_0_enabled" value="false"/>
+    <param name="sonar_1_enabled" value="false"/>
+    <param name="sonar_2_enabled" value="false"/>
+    <param name="sonar_3_enabled" value="true"/>
+    <param name="sonar_4_enabled" value="false"/>
+  </node>
+</launch>
+

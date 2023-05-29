@@ -56,6 +56,7 @@ public:
     int trigger_pin;
     int echo_pin;
     int id;
+    bool enabled;
 
     uint32_t start_tick;
     uint32_t elapsed_ticks;
@@ -73,6 +74,8 @@ public:
         this->trigger_pin = trigger_pin;
         this->echo_pin = echo_pin;
         this->id = id;
+
+        nh.param<bool>(str(boost::format{"sonar_%1%_enabled"} % id), this->enabled, true);
 
         start_tick = 0;
         elapsed_ticks = 0;
@@ -112,16 +115,21 @@ void sonar_trigger()
 {
      static int sonar = 0;
 
-     int pin = sonars[sonar].trigger_pin;
-     gpio_write(gpio, pin, PI_ON);
-     
-     int waittime = get_current_tick(gpio);
-     while(get_current_tick(gpio) - waittime < 10){
-        /* wait for 10us trigger pulse */
+     if(sonars[sonar].enabled){
+        /* every 50ms, with probably garbage accuracy */
+        time_sleep(0.05);
+
+        int pin = sonars[sonar].trigger_pin;
+        gpio_write(gpio, pin, PI_ON);
+        
+        int waittime = get_current_tick(gpio);
+        while(get_current_tick(gpio) - waittime < 10){
+            /* wait for 10us trigger pulse */
+        }
+
+        gpio_write(gpio, pin, PI_OFF);
      }
-
-     gpio_write(gpio, pin, PI_OFF);
-
+     
      sonar++;
      if (sonar >= sonars.size()) {
          sonar = 0;
@@ -131,9 +139,7 @@ void sonar_trigger()
 /* Sonar pulsing thread */ 
 void* sonar_thread(void* data) 
 {
-    /* every 50ms, with probably garbage accuracy */
     while (1){
-        time_sleep(0.05);
         sonar_trigger();
     }
     return NULL;
@@ -222,6 +228,12 @@ int main(int argc, char *argv[])
 
     while (ros::ok()) {
         for (auto& sonar: sonars) {
+
+            if(!sonar.enabled){
+                // TODO: publish some sort of range and diagnostic messages indicating that sonar was disabled (if we are going to support dynamic reconfigure)
+                continue;
+            }
+
             uint32_t elapsed_ticks = sonar.elapsed_ticks;
             if (elapsed_ticks != 0) {
                 // clear so we don't publish again
