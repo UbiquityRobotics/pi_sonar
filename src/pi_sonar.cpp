@@ -199,11 +199,30 @@ int main(int argc, char *argv[])
     ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
 
     // pin numbers are specific to the hardware
-    sonars.push_back(Sonar(20, 21, 0, nh));
-    sonars.push_back(Sonar(12, 16, 1, nh));
-    sonars.push_back(Sonar(23, 24, 2, nh));
-    sonars.push_back(Sonar(27, 22, 3, nh));
-    sonars.push_back(Sonar(19, 26, 4, nh));
+    bool sonar_0_enabled;
+    nh.param<bool>("sonar_0_enabled", sonar_0_enabled, true);
+    if(sonar_0_enabled)
+        sonars.push_back(Sonar(20, 21, 0, nh));
+    
+    bool sonar_1_enabled;
+    nh.param<bool>("sonar_1_enabled", sonar_1_enabled, true);
+    if(sonar_1_enabled)
+        sonars.push_back(Sonar(12, 16, 1, nh));
+    
+    bool sonar_2_enabled;
+    nh.param<bool>("sonar_2_enabled", sonar_2_enabled, true);
+    if(sonar_2_enabled)        
+        sonars.push_back(Sonar(23, 24, 2, nh));
+    
+    bool sonar_3_enabled;
+    nh.param<bool>("sonar_3_enabled", sonar_3_enabled, true);
+    if(sonar_3_enabled)        
+        sonars.push_back(Sonar(27, 22, 3, nh));
+    
+    bool sonar_4_enabled;
+    nh.param<bool>("sonar_4_enabled", sonar_4_enabled, true);
+    if(sonar_4_enabled)        
+        sonars.push_back(Sonar(19, 26, 4, nh));
 
     if (!setup_gpio()) {
         ROS_ERROR("Cannot initalize gpio");
