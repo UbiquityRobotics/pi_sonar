@@ -44,8 +44,13 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 
+#include <pi_sonar/PiSonarConfig.h>
+#include <dynamic_reconfigure/server.h>
+
 double min_freq = 0.5;
 double max_freq = 60;
+// std::atomic_uint sleep_between_triggers_ms;
+int sleep_between_triggers_ms;
 
 int gpio = -1;
 pthread_t* sonarthread;
@@ -107,8 +112,17 @@ public:
     }
 };
 
-
 static std::vector<Sonar> sonars;
+
+void dynamicReconfigCallback(pi_sonar::PiSonarConfig &config, uint32_t level){
+    // sleep_between_triggers_ms = config.sleep_between_triggers_ms;
+    
+    // sonars[0].enabled = config.sonar_0_enabled;
+    // sonars[1].enabled = config.sonar_1_enabled;
+    // sonars[2].enabled = config.sonar_2_enabled;
+    // sonars[3].enabled = config.sonar_3_enabled;
+    // sonars[4].enabled = config.sonar_4_enabled;
+}
 
 /* Trigger the next sonar */
 void sonar_trigger()
@@ -117,7 +131,7 @@ void sonar_trigger()
 
      if(sonars[sonar].enabled){
         /* every 50ms, with probably garbage accuracy */
-        time_sleep(0.05);
+        time_sleep(sleep_between_triggers_ms * 0.001);
 
         int pin = sonars[sonar].trigger_pin;
         gpio_write(gpio, pin, PI_ON);
@@ -201,7 +215,9 @@ int main(int argc, char *argv[])
     nh.param<double>("field_of_view", field_of_view, 0.43632347);
     nh.param<double>("min_range", min_range, 0.05);
     nh.param<double>("max_range", max_range, 10);
-
+    // int sleep_between_triggers;
+    nh.param<int>("sleep_between_triggers_ms", sleep_between_triggers_ms, 50);
+    // sleep_between_triggers_ms = sleep_between_triggers;
     ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
 
     // pin numbers are specific to the hardware
@@ -210,6 +226,11 @@ int main(int argc, char *argv[])
     sonars.push_back(Sonar(23, 24, 2, nh));
     sonars.push_back(Sonar(27, 22, 3, nh));
     sonars.push_back(Sonar(19, 26, 4, nh));
+
+    dynamic_reconfigure::Server<pi_sonar::PiSonarConfig> dr_srv;
+    dynamic_reconfigure::Server<pi_sonar::PiSonarConfig>::CallbackType f;
+    f = boost::bind(&dynamicReconfigCallback, _1, _2);
+    dr_srv.setCallback(f);
 
     if (!setup_gpio()) {
         ROS_ERROR("Cannot initalize gpio");

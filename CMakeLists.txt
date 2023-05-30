@@ -10,6 +10,12 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   roscpp
   sensor_msgs
+  dynamic_reconfigure
+)
+
+# Generate dynamic reconfigure params
+generate_dynamic_reconfigure_options(
+  cfg/PiSonar.cfg
 )
 
 ###################################
@@ -35,6 +41,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
 
   add_executable(pi_sonar src/pi_sonar.cpp)
+  add_dependencies(pi_sonar ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                 ${catkin_EXPORTED_TARGETS})
   target_compile_options(pi_sonar PRIVATE -std=c++11)
   target_link_libraries(pi_sonar ${catkin_LIBRARIES}
                         ${roscpp_LIBRARIES} pigpiod_if2 pthread)
