@@ -128,13 +128,31 @@ void sonar_trigger()
      }
 }
 
+/* Trigger the next sonar */
+void sonar_trigger_simultaneous()
+{
+    for(const Sonar& s : sonars){
+        gpio_write(gpio, s.trigger_pin, PI_ON);
+    }
+     
+    int waittime = get_current_tick(gpio);
+    while(get_current_tick(gpio) - waittime < 10){
+        /* wait for 10us trigger pulse */
+    }
+
+    for(const Sonar& s : sonars){
+        gpio_write(gpio, s.trigger_pin, PI_OFF);
+    }
+}
+
 /* Sonar pulsing thread */ 
 void* sonar_thread(void* data) 
 {
     /* every 50ms, with probably garbage accuracy */
     while (1){
         time_sleep(0.05);
-        sonar_trigger();
+        // sonar_trigger();
+        sonar_trigger_simultaneous();
     }
     return NULL;
 }
