@@ -104,6 +104,7 @@ public:
     }
 };
 
+bool simultaneous_trigger = false;
 
 static std::vector<Sonar> sonars;
 
@@ -151,8 +152,11 @@ void* sonar_thread(void* data)
     /* every 50ms, with probably garbage accuracy */
     while (1){
         time_sleep(0.05);
-        // sonar_trigger();
-        sonar_trigger_simultaneous();
+        if(!simultaneous_trigger){
+            sonar_trigger();
+        } else {
+            sonar_trigger_simultaneous();
+        }
     }
     return NULL;
 }
@@ -215,6 +219,8 @@ int main(int argc, char *argv[])
     nh.param<double>("max_range", max_range, 10);
 
     ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
+
+    nh.param<bool>("simultaneous_trigger", simultaneous_trigger, false);
 
     // pin numbers are specific to the hardware
     bool sonar_0_enabled;
