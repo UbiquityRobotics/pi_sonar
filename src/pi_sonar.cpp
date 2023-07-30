@@ -104,6 +104,7 @@ public:
     }
 };
 
+bool simultaneous_trigger = false;
 
 static std::vector<Sonar> sonars;
 
@@ -128,13 +129,34 @@ void sonar_trigger()
      }
 }
 
+/* Trigger all sonars at once */
+void sonar_trigger_simultaneous()
+{
+    for(const Sonar& s : sonars){
+        gpio_write(gpio, s.trigger_pin, PI_ON);
+    }
+     
+    int waittime = get_current_tick(gpio);
+    while(get_current_tick(gpio) - waittime < 10){
+        /* wait for 10us trigger pulse */
+    }
+
+    for(const Sonar& s : sonars){
+        gpio_write(gpio, s.trigger_pin, PI_OFF);
+    }
+}
+
 /* Sonar pulsing thread */ 
 void* sonar_thread(void* data) 
 {
     /* every 50ms, with probably garbage accuracy */
     while (1){
         time_sleep(0.05);
-        sonar_trigger();
+        if(!simultaneous_trigger){
+            sonar_trigger();
+        } else {
+            sonar_trigger_simultaneous();
+        }
     }
     return NULL;
 }
@@ -198,12 +220,33 @@ int main(int argc, char *argv[])
 
     ros::Publisher pub = nh.advertise<sensor_msgs::Range>("/sonars", 5);
 
+    nh.param<bool>("simultaneous_trigger", simultaneous_trigger, false);
+
     // pin numbers are specific to the hardware
-    sonars.push_back(Sonar(20, 21, 0, nh));
-    sonars.push_back(Sonar(12, 16, 1, nh));
-    sonars.push_back(Sonar(23, 24, 2, nh));
-    sonars.push_back(Sonar(27, 22, 3, nh));
-    sonars.push_back(Sonar(19, 26, 4, nh));
+    bool sonar_0_enabled;
+    nh.param<bool>("sonar_0_enabled", sonar_0_enabled, true);
+    if(sonar_0_enabled)
+        sonars.push_back(Sonar(20, 21, 0, nh));
+    
+    bool sonar_1_enabled;
+    nh.param<bool>("sonar_1_enabled", sonar_1_enabled, true);
+    if(sonar_1_enabled)
+        sonars.push_back(Sonar(12, 16, 1, nh));
+    
+    bool sonar_2_enabled;
+    nh.param<bool>("sonar_2_enabled", sonar_2_enabled, true);
+    if(sonar_2_enabled)        
+        sonars.push_back(Sonar(23, 24, 2, nh));
+    
+    bool sonar_3_enabled;
+    nh.param<bool>("sonar_3_enabled", sonar_3_enabled, true);
+    if(sonar_3_enabled)        
+        sonars.push_back(Sonar(27, 22, 3, nh));
+    
+    bool sonar_4_enabled;
+    nh.param<bool>("sonar_4_enabled", sonar_4_enabled, true);
+    if(sonar_4_enabled)        
+        sonars.push_back(Sonar(19, 26, 4, nh));
 
     if (!setup_gpio()) {
         ROS_ERROR("Cannot initalize gpio");
