@@ -129,7 +129,7 @@ void sonar_trigger()
      }
 }
 
-/* Trigger the next sonar */
+/* Trigger all sonars at once */
 void sonar_trigger_simultaneous()
 {
     for(const Sonar& s : sonars){
